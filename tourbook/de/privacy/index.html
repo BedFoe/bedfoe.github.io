@@ -22,6 +22,8 @@ h1 { font-size: 1.8rem; line-height: 1.2; margin: 1.6rem 0 0.6rem; }
 h2 { font-size: 1.15rem; margin: 1.8rem 0 0.4rem; }
 p, li { color: var(--ink); }
 code { font-size: 0.9em; overflow-wrap: anywhere; }
+pre { overflow-x: auto; padding: 12px; border: 1px solid var(--rule); border-radius: 6px; font-size: 13px; line-height: 1.45; }
+pre code { overflow-wrap: normal; font-size: inherit; }
 .lead { font-size: 1.1rem; color: var(--muted); }
 .draft { background: #fde68a; color: #1c1917; padding: 8px 12px; border-radius: 6px; font-weight: 600; }
 .table { overflow-x: auto; }
@@ -62,7 +64,7 @@ deines Geräts preis, und sie nennt die App und ihre Version
 Nutzungsbedingungen der Dienste verlangen — nichts über dich.</p>
 <div class="table"><table>
 <thead><tr><th>Dienst</th><th>Wann</th><th>Was er erhält</th></tr></thead>
-<tbody><tr><td>Kartenkacheln von swisstopo (<code>wmts.geo.admin.ch</code>), OpenStreetMap (<code>tile.openstreetmap.org</code>), OpenTopoMap (<code>tile.opentopomap.org</code>)</td><td>Während eine Karte angezeigt wird</td><td>Den angezeigten Kartenausschnitt (Kachelkoordinaten)</td></tr><tr><td>Höhendienst von swisstopo (<code>api3.geo.admin.ch</code>)</td><td>Wenn du auf der Karte einen Punkt in der Schweiz setzt — auch mit «Pin auf meinen Standort», das deine aktuelle Position setzt</td><td>Die genauen Koordinaten dieses Punkts</td></tr><tr><td>OpenStreetMap Nominatim (<code>nominatim.openstreetmap.org</code>)</td><td>Wenn ein GPX-Track oder ein Ziel hinzugefügt wird, um die Region vorzuschlagen. Die Regionserkennung ist <strong>standardmässig eingeschaltet</strong>; sie lässt sich in den Einstellungen ausschalten, dann wird keine Anfrage gestellt</td><td>Eine Koordinate dieses Tracks oder Orts, vor dem Senden auf ein Raster von 0,02° (etwa 2 km) gerundet</td></tr><tr><td>GitHub (<code>github.com</code>, <code>*.githubusercontent.com</code>)</td><td>Wenn du die Seite der Regions- und Höhenpakete öffnest oder ein Paket herunterlädst, und wenn ein Punkt, den du auf der Karte setzt, keine Höhe erhält und die App das Höhenpaket für diese Region anbietet</td><td>Die Anfrage nach der öffentlichen Paketliste oder Paketdatei</td></tr><tr><td>Google-Anmeldung (<code>accounts.google.com</code>)</td><td>Nur wenn du Google Drive verbindest: Die Anmeldeseite öffnet sich in deinem Browser</td><td>Was du dort eingibst, nach den Bedingungen von Google</td></tr><tr><td>Google (<code>oauth2.googleapis.com</code>, <code>www.googleapis.com</code>)</td><td>Nur wenn du Google Drive für Backups verbindest</td><td>Siehe unten</td></tr></tbody>
+<tbody><tr><td>Kartenkacheln von swisstopo (<code>wmts.geo.admin.ch</code>), OpenStreetMap (<code>tile.openstreetmap.org</code>)</td><td>Während eine Karte angezeigt wird</td><td>Den angezeigten Kartenausschnitt (Kachelkoordinaten)</td></tr><tr><td>Höhendienst von swisstopo (<code>api3.geo.admin.ch</code>)</td><td>Wenn du auf der Karte einen Punkt in der Schweiz setzt — auch mit «Pin auf meinen Standort», das deine aktuelle Position setzt</td><td>Die genauen Koordinaten dieses Punkts</td></tr><tr><td>OpenStreetMap Nominatim (<code>nominatim.openstreetmap.org</code>)</td><td>Wenn ein GPX-Track oder ein Ziel hinzugefügt wird, um die Region vorzuschlagen. Die Regionserkennung ist <strong>standardmässig eingeschaltet</strong>; sie lässt sich in den Einstellungen ausschalten, dann wird keine Anfrage gestellt</td><td>Eine Koordinate dieses Tracks oder Orts, vor dem Senden auf ein Raster von 0,02° (etwa 2 km) gerundet</td></tr><tr><td>GitHub (<code>github.com</code>, <code>*.githubusercontent.com</code>)</td><td>Wenn du die Seite der Regions- und Höhenpakete öffnest oder ein Paket herunterlädst, und wenn ein Punkt, den du auf der Karte setzt, keine Höhe erhält und die App das Höhenpaket für diese Region anbietet</td><td>Die Anfrage nach der öffentlichen Paketliste oder Paketdatei</td></tr><tr><td>Google-Anmeldung (<code>accounts.google.com</code>)</td><td>Nur wenn du Google Drive verbindest: Die Anmeldeseite öffnet sich in deinem Browser</td><td>Was du dort eingibst, nach den Bedingungen von Google</td></tr><tr><td>Google (<code>oauth2.googleapis.com</code>, <code>www.googleapis.com</code>)</td><td>Nur wenn du Google Drive für Backups verbindest</td><td>Siehe unten</td></tr></tbody>
 </table></div>
 <p>Keine dieser Anfragen enthält deinen Namen, deine Touren oder eine von der
 App erzeugte Kennung — ausser den Backups auf Drive, die du selbst anlegst
@@ -177,6 +179,6 @@ neuen Gültigkeitsdatum veröffentlicht.</p>
 <h2>Kontakt</h2>
 <p>Beda Föhn, foehnetics@gmail.com</p>
 </main>
-<footer><a href="../../de/">Startseite</a> · <a href="../../de/privacy/">Datenschutz</a></footer>
+<footer><a href="../../de/">Startseite</a> · <a href="../../de/privacy/">Datenschutz</a> · <a href="../../archive-format/">Archivformat</a></footer>
 </body>
 </html>

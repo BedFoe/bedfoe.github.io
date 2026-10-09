@@ -22,6 +22,8 @@ h1 { font-size: 1.8rem; line-height: 1.2; margin: 1.6rem 0 0.6rem; }
 h2 { font-size: 1.15rem; margin: 1.8rem 0 0.4rem; }
 p, li { color: var(--ink); }
 code { font-size: 0.9em; overflow-wrap: anywhere; }
+pre { overflow-x: auto; padding: 12px; border: 1px solid var(--rule); border-radius: 6px; font-size: 13px; line-height: 1.45; }
+pre code { overflow-wrap: normal; font-size: inherit; }
 .lead { font-size: 1.1rem; color: var(--muted); }
 .draft { background: #fde68a; color: #1c1917; padding: 8px 12px; border-radius: 6px; font-weight: 600; }
 .table { overflow-x: auto; }
@@ -60,7 +62,7 @@ it names the app and its version (<code>TourBook/&lt;version&gt;</code> with a l
 site), as the services' usage policies ask — nothing about you.</p>
 <div class="table"><table>
 <thead><tr><th>Service</th><th>When</th><th>What it receives</th></tr></thead>
-<tbody><tr><td>swisstopo map tiles (<code>wmts.geo.admin.ch</code>), OpenStreetMap (<code>tile.openstreetmap.org</code>), OpenTopoMap (<code>tile.opentopomap.org</code>)</td><td>While a map is shown</td><td>The map area being displayed (tile coordinates)</td></tr><tr><td>swisstopo height service (<code>api3.geo.admin.ch</code>)</td><td>When you place a point in Switzerland on the map — including &quot;Pin at my position&quot;, which places your current position</td><td>That point's precise coordinates</td></tr><tr><td>OpenStreetMap Nominatim (<code>nominatim.openstreetmap.org</code>)</td><td>When a GPX track or a destination is added, to suggest the region. Region detection is <strong>on by default</strong>; it can be switched off in the settings, and then no request is made</td><td>One coordinate of that track or place, rounded to a grid of 0.02° (about 2 km) before it is sent</td></tr><tr><td>GitHub (<code>github.com</code>, <code>*.githubusercontent.com</code>)</td><td>When you open the region &amp; elevation pack screen or download a pack, and when a point you place on the map gets no elevation and the app offers the elevation pack for that region</td><td>The request for the public pack list or pack file</td></tr><tr><td>Google sign-in (<code>accounts.google.com</code>)</td><td>Only if you connect Google Drive: the sign-in page opens in your browser</td><td>What you enter there, under Google's terms</td></tr><tr><td>Google (<code>oauth2.googleapis.com</code>, <code>www.googleapis.com</code>)</td><td>Only if you connect Google Drive for backups</td><td>See below</td></tr></tbody>
+<tbody><tr><td>swisstopo map tiles (<code>wmts.geo.admin.ch</code>), OpenStreetMap (<code>tile.openstreetmap.org</code>)</td><td>While a map is shown</td><td>The map area being displayed (tile coordinates)</td></tr><tr><td>swisstopo height service (<code>api3.geo.admin.ch</code>)</td><td>When you place a point in Switzerland on the map — including &quot;Pin at my position&quot;, which places your current position</td><td>That point's precise coordinates</td></tr><tr><td>OpenStreetMap Nominatim (<code>nominatim.openstreetmap.org</code>)</td><td>When a GPX track or a destination is added, to suggest the region. Region detection is <strong>on by default</strong>; it can be switched off in the settings, and then no request is made</td><td>One coordinate of that track or place, rounded to a grid of 0.02° (about 2 km) before it is sent</td></tr><tr><td>GitHub (<code>github.com</code>, <code>*.githubusercontent.com</code>)</td><td>When you open the region &amp; elevation pack screen or download a pack, and when a point you place on the map gets no elevation and the app offers the elevation pack for that region</td><td>The request for the public pack list or pack file</td></tr><tr><td>Google sign-in (<code>accounts.google.com</code>)</td><td>Only if you connect Google Drive: the sign-in page opens in your browser</td><td>What you enter there, under Google's terms</td></tr><tr><td>Google (<code>oauth2.googleapis.com</code>, <code>www.googleapis.com</code>)</td><td>Only if you connect Google Drive for backups</td><td>See below</td></tr></tbody>
 </table></div>
 <p>None of these requests carries your name, your tours or any identifier
 created by the app — except the Drive backups you choose to make, which are
@@ -166,6 +168,6 @@ effective date.</p>
 <h2>Contact</h2>
 <p>Beda Föhn, foehnetics@gmail.com</p>
 </main>
-<footer><a href="../">Home</a> · <a href="../privacy/">Privacy policy</a></footer>
+<footer><a href="../">Home</a> · <a href="../privacy/">Privacy policy</a> · <a href="../archive-format/">Archive format</a></footer>
 </body>
 </html>

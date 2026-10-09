@@ -22,6 +22,8 @@ h1 { font-size: 1.8rem; line-height: 1.2; margin: 1.6rem 0 0.6rem; }
 h2 { font-size: 1.15rem; margin: 1.8rem 0 0.4rem; }
 p, li { color: var(--ink); }
 code { font-size: 0.9em; overflow-wrap: anywhere; }
+pre { overflow-x: auto; padding: 12px; border: 1px solid var(--rule); border-radius: 6px; font-size: 13px; line-height: 1.45; }
+pre code { overflow-wrap: normal; font-size: inherit; }
 .lead { font-size: 1.1rem; color: var(--muted); }
 .draft { background: #fde68a; color: #1c1917; padding: 8px 12px; border-radius: 6px; font-weight: 600; }
 .table { overflow-x: auto; }
@@ -43,19 +45,19 @@ footer { margin-top: 3rem; padding-bottom: 32px; font-size: 14px; color: var(--m
 <h2>Deine Daten gehören dir</h2>
 <ul><li>Kein Konto, keine Werbung, kein Tracking, kein Abo</li><li>Alles liegt lokal auf dem Gerät und funktioniert auch ohne Netz: erfassen, nachschlagen, filtern, Statistik</li><li>Backup als eine Datei, automatisch in einen Ordner oder in dein eigenes Google Drive</li><li>Einmal kaufen, für immer nutzen</li></ul>
 <h2>18 Sportarten mit den richtigen Feldern</h2>
-<p>Wandern, Kraxeln, Hochtour, Skitour, Skihochtour, Schneeschuhtour, Klettern, Bouldern, Eisklettern, Mixedklettern, Klettersteig, Trailrunning, Jogging, Orientierungslauf, Langlauf, Mountainbike, Rennrad und Gleitschirm.</p>
-<p>Jede Sportart fragt nur nach dem, was für sie zählt: SAC-, UIAA-, französische und Font-Skala, Klettersteig K1–K6, Wanderskala T1–T6 und WT1–WT6, Seillängen, Begehungsstil und Versuche, Lawinenstufe und Schneeverhältnisse, Flugart, Wettkampf mit Rang. Eigene Merkmale definierst du pro Sportart selbst.</p>
+<p>Wandern, Kraxeln, Hochtour, Skitour, Skihochtour, Schneeschuhtour, Klettern, Bouldern, Eisklettern, Mixedklettern, Klettersteig, Trailrunning, Laufen, Orientierungslauf, Langlauf, Mountainbike, Rennrad und Gleitschirm.</p>
+<p>Jede Sportart fragt nur nach dem, was für sie zählt: SAC-, UIAA-, französische und Font-Skala, Klettersteig K1–K6, Wanderskala T1–T6 und WT1–WT6, Seillängen, Begehungsstil und Anläufe, Lawinenstufe und Schneeverhältnisse, Flugart, Wettkampf mit Rang. Eigene Merkmale definierst du pro Sportart selbst.</p>
 <p>Eine Tour kann aus mehreren Abschnitten bestehen: Hike &amp; Fly, Skitour mit Gipfelkletterei, Velo-Zustieg zum Klettergarten.</p>
 <h2>Erfassen in Sekunden, pflegen ohne Mühe</h2>
-<ul><li>GPX-Datei laden: Distanz, Höhenmeter, Dauer, Gipfel, Orte und Region werden vorgeschlagen</li><li>Gipfel, Orte und Hütten der Schweiz sind eingebaut; für die Alpenländer gibt es Offline-Pakete</li><li>Klettergebiete, Sektoren und Routen sind deine eigene Datenbank. Eine Route legst du einmal an und findest sie bei jeder Begehung wieder.</li><li>Partner, Tags, Fotos, Sammlungen für Reisen und Projekte</li><li>Tour duplizieren, Vorschläge aus deinen bisherigen Einträgen, Tippfehler mit einem Griff zusammenführen</li><li>Umstieg leicht gemacht: GPX-Sammlungen auf einmal importieren</li></ul>
+<ul><li>GPX-Datei laden: Distanz, Höhenmeter, Dauer, Gipfel, Orte und Region werden vorgeschlagen</li><li>Gipfel, Orte und Hütten der Schweiz sind eingebaut; für die Alpenländer gibt es Offline-Pakete</li><li>Klettergebiete, Sektoren und Routen sind deine eigene Datenbank. Eine Route legst du einmal an und findest sie bei jeder Begehung wieder.</li><li>Partner, Tags, Fotos, Sammlungen für Reisen und Projekte</li><li>Tour duplizieren, Vorschläge aus deinen bisherigen Einträgen, Tippfehler mit einem Griff zusammenführen</li><li>Umstieg leicht gemacht: viele GPX-Dateien auf einmal importieren</li></ul>
 <h2>Für Statistik-Fans</h2>
-<ul><li>Totale pro Sportart, Jahr, Saison, Monat und Wochentag</li><li>Jahresvergleich: wo du heute stehst gegenüber dem gleichen Tag im Vorjahr</li><li>Rekorde: längste Tour, meiste Höhenmeter, schnellster Aufstieg</li><li>Verteilungen von Distanz, Höhenmetern, Dauer und Schwierigkeit</li><li>Kletterstatistik: Seillängen, Klettermeter, Grad-Pyramide, schwierigste Begehungen, Projekte mit Anzahl Versuchen</li><li>Wettkämpfe mit Rang und Feldgrösse</li><li>Ziellisten: Schweizer und Alpen-Viertausender, Kantonshöhepunkte, SAC-Hütten, Schweizer Passstrassen, Seven Summits und mehr</li><li>Höhenprofil mit Auf- und Abstiegstempo, Steigung und Bewegungszeit</li><li>Ein Filter für alles: Liste, Karte und Statistik zeigen dieselbe Auswahl</li></ul>
+<ul><li>Totale pro Sportart, Jahr, Saison, Monat und Wochentag</li><li>Jahresvergleich: wo du heute stehst gegenüber dem gleichen Tag im Vorjahr</li><li>Rekorde: längste Tour, meiste Höhenmeter, schnellster Aufstieg</li><li>Verteilungen von Distanz, Höhenmetern, Dauer und Schwierigkeit</li><li>Kletterstatistik: Seillängen, Klettermeter, Grad-Pyramide, schwierigste Begehungen, Projekte mit Anzahl Anläufen</li><li>Wettkämpfe mit Rang und Feldgrösse</li><li>Ziellisten: Schweizer und Alpen-Viertausender, Kantonshöhepunkte, die höchsten Gipfel der Alpenländer, SAC-Hütten und Schweizer Passstrassen</li><li>Höhenprofil mit Auf- und Abstiegstempo, Steigung und Bewegungszeit</li><li>Ein Filter für alles: Liste, Karte und Statistik zeigen dieselbe Auswahl</li></ul>
 <h2>Karte</h2>
 <p>Alle deine Tracks auf einer Karte, mit Heatmap und Gipfel-Pins, auf swisstopo- oder OpenStreetMap-Karten. Die Karte selbst braucht eine Verbindung. Höhenmodell- und Gipfelpakete funktionieren offline.</p>
 <h2>Für wen?</h2>
 <p>Für alle, die gerne zurückschauen: Wie oft war ich diesen Winter auf Skitour? Welche Viertausender fehlen noch? Wann bin ich die Route das letzte Mal geklettert, und mit wem?</p>
 <p>TourBook ist auf Deutsch und Englisch verfügbar.</p>
 </main>
-<footer><a href="../de/">Startseite</a> · <a href="../de/privacy/">Datenschutz</a></footer>
+<footer><a href="../de/">Startseite</a> · <a href="../de/privacy/">Datenschutz</a> · <a href="../archive-format/">Archivformat</a></footer>
 </body>
 </html>

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TourBook archive format — TourBook</title>
+<link rel="canonical" href="https://bedfoe.github.io/tourbook/archive-format/">
+<link rel="icon" href="../icon.png">
+<style>
+:root { color-scheme: light dark; --ink: #1c1917; --muted: #57534e; --ground: #fafaf9; --rule: #e7e5e4; --accent: #0f766e; }
+@media (prefers-color-scheme: dark) { :root { --ink: #f5f5f4; --muted: #a8a29e; --ground: #1c1917; --rule: #44403c; --accent: #5eead4; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header, main, footer { max-width: 44rem; margin: 0 auto; padding: 0 16px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 20px; }
+header a.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink); text-decoration: none; }
+header img { width: 36px; height: 36px; border-radius: 9px; }
+nav { display: flex; gap: 14px; font-size: 14px; }
+a { color: var(--accent); }
+h1 { font-size: 1.8rem; line-height: 1.2; margin: 1.6rem 0 0.6rem; }
+h2 { font-size: 1.15rem; margin: 1.8rem 0 0.4rem; }
+p, li { color: var(--ink); }
+code { font-size: 0.9em; overflow-wrap: anywhere; }
+pre { overflow-x: auto; padding: 12px; border: 1px solid var(--rule); border-radius: 6px; font-size: 13px; line-height: 1.45; }
+pre code { overflow-wrap: normal; font-size: inherit; }
+.lead { font-size: 1.1rem; color: var(--muted); }
+.draft { background: #fde68a; color: #1c1917; padding: 8px 12px; border-radius: 6px; font-weight: 600; }
+.table { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--rule); }
+footer { margin-top: 3rem; padding-bottom: 32px; font-size: 14px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 12px; }
+</style>
+</head>
+<body>
+<header>
+<a class="brand" href="../"><img src="../icon.png" alt="">TourBook</a>
+<nav><a href="../privacy/">Privacy policy</a><a href="../de/" hreflang="de">Deutsch</a></nav>
+</header>
+<main>
+<h1>TourBook archive format</h1>
+<p>Your logbook belongs to you. Every backup TourBook writes is an ordinary ZIP
+file that holds an ordinary SQLite database, your photos and files as they
+are, and your GPS tracks in a small binary format described below. Standard
+tools read all of it: any unzip program, the <code>sqlite3</code> command-line shell or
+a database browser, and a few lines of code for the tracks. TourBook does not
+need to be installed to get your data back out.</p>
+<p>This page describes format version 2, written by TourBook 1.0 and later.</p>
+<h2>The file</h2>
+<p>A backup is named <code>tourbook-backup-YYYYMMDD-HHMMSS.tbx.zip</code>, an export of
+selected tours <code>tourbook-export-YYYYMMDD-HHMMSS.tbx.zip</code>. The time is UTC. Both
+are plain ZIP archives (no ZIP64, so at most 4 GiB). Photos and other
+already-compressed files are stored as they are, everything else is
+compressed with Deflate.</p>
+<div class="table"><table>
+<thead><tr><th>Path in the archive</th><th>What it holds</th></tr></thead>
+<tbody><tr><td><code>db/tourbook.db</code></td><td>The SQLite database: tours, segments, places, routes, ascents, partners, tags, collections, the track figures.</td></tr><tr><td><code>media/&lt;year&gt;/&lt;tourId&gt;/&lt;mediaId&gt;.&lt;ext&gt;</code></td><td>A tour's photo or file. Beside it <code>&lt;mediaId&gt;.thumb.&lt;ext&gt;</code> (a small preview) and, when the original was kept, <code>&lt;mediaId&gt;.original.&lt;ext&gt;</code>.</td></tr><tr><td><code>media/locations/&lt;locationId&gt;/&lt;mediaId&gt;.&lt;ext&gt;</code></td><td>A photo of a place, sector or peak, with the same <code>.thumb</code> and <code>.original</code> companions.</td></tr><tr><td><code>gpx/&lt;year&gt;/&lt;tourId&gt;/&lt;trackId&gt;.tbg</code></td><td>One GPS track in the TBG1 format below.</td></tr><tr><td><code>gpx/&lt;year&gt;/&lt;tourId&gt;/&lt;trackId&gt;.gpx</code></td><td>The GPX file the track was imported from, when it was kept.</td></tr><tr><td><code>manifest.json</code></td><td>What the archive holds, with a checksum for every file. It is written last, so an archive cut short has none.</td></tr></tbody>
+</table></div>
+<p><code>&lt;year&gt;</code> is the year of the tour's date. Every path below <code>media/</code> and <code>gpx/</code>
+is also stored in the database (<code>media.rel_path</code>, <code>media.thumb_rel_path</code>,
+<code>gpx_track.geometry_rel_path</code>, <code>gpx_track.archive_rel_path</code>), so each file
+belongs to exactly one row.</p>
+<h2>manifest.json</h2>
+<p>A JSON object with these fields:</p>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>formatVersion</code></td><td><code>2</code> for this format.</td></tr><tr><td><code>source</code></td><td><code>app</code>: written by the TourBook app.</td></tr><tr><td><code>appVersion</code></td><td>The app version that wrote the archive.</td></tr><tr><td><code>schemaVersion</code></td><td>The database's schema version, explained under Versions below.</td></tr><tr><td><code>createdAt</code></td><td>When the archive was written, ISO 8601 in UTC.</td></tr><tr><td><code>contents</code></td><td><code>full</code>: the complete logbook of one installation, for a restore. <code>filtered</code>: selected tours, for importing into another logbook. Archives written before this field existed are <code>full</code>.</td></tr><tr><td><code>databaseId</code></td><td>An identifier of the logbook, the same in all its full backups. Absent in a filtered export.</td></tr><tr><td><code>counts</code></td><td>Rows per table in the archived database: <code>{ &quot;tour&quot;: 429, … }</code>.</td></tr><tr><td><code>entries</code></td><td>Every file of the archive except the manifest itself: <code>{ &quot;path&quot;, &quot;bytes&quot;, &quot;sha256&quot; }</code>, with the uncompressed size and the SHA-256 of the uncompressed content as lowercase hex.</td></tr><tr><td><code>totalBytes</code></td><td>The sum of all <code>entries[].bytes</code>.</td></tr></tbody>
+</table></div>
+<p><code>counts</code> covers these tables: <code>person</code>, <code>region</code>, <code>tag</code>, <code>collection</code>,
+<code>location</code>, <code>location_attribute</code>, <code>route</code>, <code>route_pitch</code>, <code>route_grade</code>,
+<code>route_pitch_grade</code>, <code>tour</code>, <code>tour_segment</code>, <code>tour_person</code>, <code>tour_tag</code>,
+<code>tour_location</code>, <code>segment_grade</code>, <code>ascent</code>, <code>ascent_pitch</code>, <code>media</code>,
+<code>gpx_track</code>, <code>gpx_waypoint</code>. Tours in the trash are counted too.</p>
+<p>To check an archive by hand: unzip it and compare <code>sha256sum</code> of each file
+with its entry.</p>
+<h2>The database</h2>
+<p><code>db/tourbook.db</code> is a regular SQLite 3 database, not encrypted. Its own
+schema is the reference: <code>sqlite3 tourbook.db .schema</code> lists every table,
+column and rule with comments. The tables that hold your logbook:</p>
+<div class="table"><table>
+<thead><tr><th>Table</th><th>What a row is</th></tr></thead>
+<tbody><tr><td><code>tour</code></td><td>One outing: date (<code>date_from</code>, <code>YYYY-MM-DD</code>), name, description, region, collection. <code>deleted_at</code> is set while the tour is in the trash.</td></tr><tr><td><code>tour_segment</code></td><td>One sport within a tour, in order (<code>sort_index</code>): the sport, the typed distance, height gain and loss, duration, and a race result where there was one.</td></tr><tr><td><code>tour_person</code>, <code>tour_tag</code></td><td>The partners and tags of a tour (<code>person</code>, <code>tag</code>).</td></tr><tr><td><code>tour_location</code></td><td>The peaks and places of a tour. <code>role</code> is <code>summit</code> (reached), <code>attempt</code> (turned back) or <code>visited</code>.</td></tr><tr><td><code>location</code></td><td>A peak, place, climbing area, sector or boulder, with position and height. <code>parent_id</code> builds the tree: area, then sector, then boulder.</td></tr><tr><td><code>route</code>, <code>route_pitch</code>, <code>route_grade</code>, <code>route_pitch_grade</code></td><td>A route at a location with its pitches and grades. A route belongs to its location, not to a tour.</td></tr><tr><td><code>ascent</code>, <code>ascent_pitch</code></td><td>One visit of a route on a tour segment: style, role (<code>lead</code>, <code>follow</code>, <code>alternating</code>), number of goes, the pitches climbed.</td></tr><tr><td><code>segment_grade</code></td><td>The difficulty of a segment per grading scale, typed or derived from its ascents.</td></tr><tr><td><code>gpx_track</code>, <code>gpx_waypoint</code></td><td>A recorded track of a segment (its file is the <code>.tbg</code>) and its waypoints.</td></tr><tr><td><code>tour_gpx_metrics</code>, <code>segment_gpx_metrics</code></td><td>Figures computed from the tracks: distance, gains, times, paces, speeds.</td></tr><tr><td><code>media</code></td><td>A photo or file of a tour or of a location.</td></tr><tr><td><code>collection</code></td><td>A named group of tours, with an optional planned span.</td></tr><tr><td><code>region</code></td><td>A region tree (country, canton, …).</td></tr><tr><td><code>segment_condition</code>, <code>segment_attribute*</code></td><td>Conditions such as snow or avalanche level, and the attributes you defined yourself.</td></tr></tbody>
+</table></div>
+<p>The other tables describe the app's own state on the device (settings,
+backup history, installed map packs, the migration log) or are the
+vocabularies below.</p>
+<p><strong>Stored values are stable English keys,</strong> never translated text: a sport is
+<code>hiking</code>, <code>ski_touring</code>, <code>climbing</code>; an ascent style <code>onsight</code>,
+<code>redpoint</code>; a location kind <code>peak</code>, <code>sector</code>. Every vocabulary is a table of
+its own whose rows are the allowed keys: <code>sport</code>, <code>enum_location_kind</code>,
+<code>enum_ascent_style</code>, <code>enum_ascent_role</code>, <code>enum_difficulty_scale</code>,
+<code>enum_route_character</code>, <code>enum_tour_location_role</code>, <code>condition_value</code>. A grade
+is stored as written on its scale (<code>route_grade.scale</code> = <code>french</code>, <code>value</code> =
+<code>6b+</code>), with <code>ord</code> as its position on that scale for sorting.</p>
+<p><strong>Units are in the column name:</strong> <code>_m</code> metres (<code>gain_m</code>, <code>elevation_m</code>,
+<code>length_m</code>), <code>_s</code> whole seconds (<code>duration_s</code>), <code>_km</code> kilometres, <code>_kmh</code>
+km/h, <code>_mh</code> metres per hour, <code>size_bytes</code> bytes. Positions are WGS 84
+degrees (<code>lat</code>, <code>lon</code>). Times are ISO 8601 text. A missing value is <code>NULL</code>,
+never <code>0</code>. Identifiers are UUIDs (version 7) as text.</p>
+<h2>Tracks: the TBG1 format</h2>
+<p>A <code>.tbg</code> file holds one track as columns of fixed-size numbers, all
+little-endian:</p>
+<div class="table"><table>
+<thead><tr><th>Offset</th><th>Size</th><th>Field</th></tr></thead>
+<tbody><tr><td>0</td><td>4</td><td>The ASCII characters <code>TBG1</code>.</td></tr><tr><td>4</td><td>2</td><td>Flags (unsigned): bit 0 = the track has heights, bit 1 = the track has times.</td></tr><tr><td>6</td><td>2</td><td>Reserved, 0.</td></tr><tr><td>8</td><td>4</td><td><code>count</code>: the number of points (unsigned).</td></tr><tr><td>12</td><td>4</td><td><code>t0</code>: the earliest time, seconds since 1970-01-01 UTC (unsigned); 0 without times.</td></tr><tr><td>16</td><td>4 × count</td><td>Latitudes: signed 32-bit, degrees × 10 000 000.</td></tr><tr><td>…</td><td>4 × count</td><td>Longitudes: signed 32-bit, degrees × 10 000 000.</td></tr><tr><td>…</td><td>4 × count</td><td>Only with bit 1: seconds after <code>t0</code>, unsigned 32-bit.</td></tr><tr><td>…</td><td>2 × count</td><td>Only with bit 0: height in whole metres, signed 16-bit; −32768 means no height for that point.</td></tr></tbody>
+</table></div>
+<p>Times are all or nothing: a track has a time for every point or for none.
+The columns follow each other without gaps; the file ends after the last
+one. A recording with several track segments is one track.</p>
+<p>This JavaScript turns a <code>.tbg</code> into points and into a GPX file. It needs no
+library and runs in Node or a browser:</p>
+<pre><code>function readTbg(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const magic = String.fromCharCode(...bytes.subarray(0, 4));
+  if (magic !== 'TBG1') throw new Error('not a TBG1 track');
+  const flags = view.getUint16(4, true);
+  const count = view.getUint32(8, true);
+  const t0 = view.getUint32(12, true);
+  const hasHeight = (flags &amp; 1) !== 0;
+  const hasTime = (flags &amp; 2) !== 0;
+  const latAt = 16;
+  const lonAt = latAt + 4 * count;
+  const timeAt = lonAt + 4 * count;
+  const heightAt = timeAt + (hasTime ? 4 * count : 0);
+  const points = [];
+  for (let i = 0; i &lt; count; i++) {
+    const height = hasHeight ? view.getInt16(heightAt + 2 * i, true) : -32768;
+    points.push({
+      lat: view.getInt32(latAt + 4 * i, true) / 1e7,
+      lon: view.getInt32(lonAt + 4 * i, true) / 1e7,
+      ele: height === -32768 ? null : height,
+      time: hasTime ? new Date((t0 + view.getUint32(timeAt + 4 * i, true)) * 1000) : null,
+    });
+  }
+  return points;
+}
+
+function tbgToGpx(bytes, name = 'Track') {
+  const escape = (text) =&gt; text.replace(/&amp;/g, '&amp;amp;').replace(/&lt;/g, '&amp;lt;').replace(/&gt;/g, '&amp;gt;');
+  const points = readTbg(bytes).map((p) =&gt; {
+    const ele = p.ele === null ? '' : `&lt;ele&gt;${p.ele}&lt;/ele&gt;`;
+    const time = p.time === null ? '' : `&lt;time&gt;${p.time.toISOString()}&lt;/time&gt;`;
+    return `&lt;trkpt lat=&quot;${p.lat}&quot; lon=&quot;${p.lon}&quot;&gt;${ele}${time}&lt;/trkpt&gt;`;
+  });
+  return [
+    '&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;',
+    '&lt;gpx version=&quot;1.1&quot; creator=&quot;tbgToGpx&quot; xmlns=&quot;http://www.topografix.com/GPX/1/1&quot;&gt;',
+    `&lt;trk&gt;&lt;name&gt;${escape(name)}&lt;/name&gt;&lt;trkseg&gt;`,
+    ...points,
+    '&lt;/trkseg&gt;&lt;/trk&gt;',
+    '&lt;/gpx&gt;',
+  ].join('\n');
+}</code></pre>
+<p>In Node, <code>fs.writeFileSync('track.gpx', tbgToGpx(fs.readFileSync('track.tbg')))</code>
+writes the GPX next to it. The track's name, sport and tour are in the
+database: <code>gpx_track.geometry_rel_path</code> names the file, <code>gpx_track.tour_segment_id</code>
+its segment.</p>
+<h2>Versions</h2>
+<p><code>formatVersion</code> changes only when the container itself changes. The
+database changes more often: every app update that changes a table raises
+<code>schemaVersion</code>. Version 1.0 starts at <code>schemaVersion</code> 49. TourBook restores
+an archive from any earlier version since then and brings its database up to
+date while doing so; it refuses an archive written by a newer app than
+itself, and one written by a test version before 1.0 (<code>schemaVersion</code> below
+49). An export of selected tours is imported only by
+an app at the same <code>schemaVersion</code>. Your copy of an older archive always
+stays readable with the tools above, since every version is a plain SQLite
+database.</p>
+</main>
+<footer><a href="../">Home</a> · <a href="../privacy/">Privacy policy</a> · <a href="../archive-format/">Archive format</a></footer>
+</body>
+</html>
