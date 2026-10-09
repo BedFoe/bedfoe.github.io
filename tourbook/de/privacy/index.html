@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TourBook — Datenschutz</title>
+<link rel="canonical" href="https://bedfoe.github.io/tourbook/de/privacy/">
+<link rel="alternate" hreflang="en" href="https://bedfoe.github.io/tourbook/privacy/">
+<link rel="icon" href="../../icon.png">
+<style>
+:root { color-scheme: light dark; --ink: #1c1917; --muted: #57534e; --ground: #fafaf9; --rule: #e7e5e4; --accent: #0f766e; }
+@media (prefers-color-scheme: dark) { :root { --ink: #f5f5f4; --muted: #a8a29e; --ground: #1c1917; --rule: #44403c; --accent: #5eead4; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header, main, footer { max-width: 44rem; margin: 0 auto; padding: 0 16px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 20px; }
+header a.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink); text-decoration: none; }
+header img { width: 36px; height: 36px; border-radius: 9px; }
+nav { display: flex; gap: 14px; font-size: 14px; }
+a { color: var(--accent); }
+h1 { font-size: 1.8rem; line-height: 1.2; margin: 1.6rem 0 0.6rem; }
+h2 { font-size: 1.15rem; margin: 1.8rem 0 0.4rem; }
+p, li { color: var(--ink); }
+code { font-size: 0.9em; overflow-wrap: anywhere; }
+.lead { font-size: 1.1rem; color: var(--muted); }
+.draft { background: #fde68a; color: #1c1917; padding: 8px 12px; border-radius: 6px; font-weight: 600; }
+.table { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--rule); }
+footer { margin-top: 3rem; padding-bottom: 32px; font-size: 14px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 12px; }
+</style>
+</head>
+<body>
+<header>
+<a class="brand" href="../../de/"><img src="../../icon.png" alt="">TourBook</a>
+<nav><a href="../../de/privacy/">Datenschutz</a><a href="../../privacy/" hreflang="en">English</a></nav>
+</header>
+<main>
+<h1>TourBook — Datenschutz</h1>
+<p><strong>Gültig ab:</strong> 2026-10-08<br>
+<strong>Verantwortlich:</strong> Beda Föhn, Switzerland, foehnetics@gmail.com</p>
+<h2>Kurz gesagt</h2>
+<p>TourBook ist ein Tourenbuch, das deine Daten auf deinem Telefon behält. Es
+gibt kein TourBook-Konto, keinen TourBook-Server, keine Werbung, keine
+Analyse und kein Tracking. Der Entwickler erhält keine Daten aus deinem
+Tourenbuch; was Google Play ihm über Käufe und Abstürze der App meldet, steht
+weiter unten.</p>
+<h2>Was auf deinem Gerät bleibt</h2>
+<p>Alles, was du erfasst — Touren, Routen, Gipfel und Orte, Partner, Tags,
+Notizen, Fotos, GPX-Tracks, Statistiken und Einstellungen — wird im privaten
+Speicher der App auf deinem Gerät abgelegt. Die Android-eigene Cloud-Sicherung
+von App-Daten und die Android-eigene Übertragung von App-Daten auf ein neues
+Gerät (beim Einrichten eines neuen Telefons) sind für diese App beide
+ausgeschaltet; die Backups der App entstehen nur dort, wo du es wählst
+(siehe unten).</p>
+<h2>Wann die App das Internet nutzt</h2>
+<p>Die App funktioniert offline. Sie kontaktiert die folgenden Dienste nur für
+den genannten Zweck und schickt ihnen nur, was dieser Zweck braucht. Wie jede
+Internet-Anfrage gibt auch jede dieser Anfragen dem Dienst die IP-Adresse
+deines Geräts preis, und sie nennt die App und ihre Version
+(<code>TourBook/&lt;Version&gt;</code> mit einem Link auf diese Seite), wie es die
+Nutzungsbedingungen der Dienste verlangen — nichts über dich.</p>
+<div class="table"><table>
+<thead><tr><th>Dienst</th><th>Wann</th><th>Was er erhält</th></tr></thead>
+<tbody><tr><td>Kartenkacheln von swisstopo (<code>wmts.geo.admin.ch</code>), OpenStreetMap (<code>tile.openstreetmap.org</code>), OpenTopoMap (<code>tile.opentopomap.org</code>)</td><td>Während eine Karte angezeigt wird</td><td>Den angezeigten Kartenausschnitt (Kachelkoordinaten)</td></tr><tr><td>Höhendienst von swisstopo (<code>api3.geo.admin.ch</code>)</td><td>Wenn du auf der Karte einen Punkt in der Schweiz setzt — auch mit «Pin auf meinen Standort», das deine aktuelle Position setzt</td><td>Die genauen Koordinaten dieses Punkts</td></tr><tr><td>OpenStreetMap Nominatim (<code>nominatim.openstreetmap.org</code>)</td><td>Wenn ein GPX-Track oder ein Ziel hinzugefügt wird, um die Region vorzuschlagen. Die Regionserkennung ist <strong>standardmässig eingeschaltet</strong>; sie lässt sich in den Einstellungen ausschalten, dann wird keine Anfrage gestellt</td><td>Eine Koordinate dieses Tracks oder Orts, vor dem Senden auf ein Raster von 0,02° (etwa 2 km) gerundet</td></tr><tr><td>GitHub (<code>github.com</code>, <code>*.githubusercontent.com</code>)</td><td>Wenn du die Seite der Regions- und Höhenpakete öffnest oder ein Paket herunterlädst, und wenn ein Punkt, den du auf der Karte setzt, keine Höhe erhält und die App das Höhenpaket für diese Region anbietet</td><td>Die Anfrage nach der öffentlichen Paketliste oder Paketdatei</td></tr><tr><td>Google-Anmeldung (<code>accounts.google.com</code>)</td><td>Nur wenn du Google Drive verbindest: Die Anmeldeseite öffnet sich in deinem Browser</td><td>Was du dort eingibst, nach den Bedingungen von Google</td></tr><tr><td>Google (<code>oauth2.googleapis.com</code>, <code>www.googleapis.com</code>)</td><td>Nur wenn du Google Drive für Backups verbindest</td><td>Siehe unten</td></tr></tbody>
+</table></div>
+<p>Keine dieser Anfragen enthält deinen Namen, deine Touren oder eine von der
+App erzeugte Kennung — ausser den Backups auf Drive, die du selbst anlegst
+und die unten beschrieben sind.</p>
+<p>Jeder dieser Dienste führt eigene Server-Protokolle über die Anfragen, die er
+erhält (üblicherweise die IP-Adresse, die Zeit und die Anfrage selbst, die
+beim Höhendienst und bei Nominatim die oben genannten Koordinaten enthält).
+Für diese Protokolle gilt die Datenschutzerklärung des jeweiligen Anbieters;
+der Entwickler hat keinen Zugriff darauf.</p>
+<h2>Deine Position und die Google-Play-Dienste</h2>
+<p>Um deine Position auf der Karte zu finden, nutzt die App den Standortdienst
+von Android über die Google-Play-Dienste (den *Fused Location Provider*). Je
+nach den Standorteinstellungen deines Geräts — zum Beispiel der
+Google-Standortgenauigkeit — kann Google WLAN-, Mobilfunk- und Sensorsignale
+verwenden, um die Position zu bestimmen. Diese Verarbeitung ist diejenige
+von Google und richtet sich nach der
+<a href="https://policies.google.com/privacy">Datenschutzerklärung von Google</a> und
+deinen Geräteeinstellungen; die App selbst erhält nur die Position.</p>
+<h2>Backups auf Google Drive (freiwillig)</h2>
+<p>Wenn du Google Drive verbindest, meldest du dich bei Google an und erteilst
+der App die Berechtigung <code>drive.file</code> sowie den Zugriff auf deine
+E-Mail-Adresse. Mit <code>drive.file</code> kann die App nur Dateien sehen und ändern,
+die sie selbst erstellt hat — sonst nichts in deinem Drive. Backup-Archive
+(deine Tourenbuch-Datenbank, Fotos und Tracks) werden in einen sichtbaren
+Ordner <code>TourBook</code> in deinem eigenen Drive hochgeladen. Jedes Archiv trägt in
+Drive eine zufällige Kennung deines Tourenbuchs und die Anzahl seiner Touren,
+damit die App die neuesten Backups dieses Tourenbuchs behalten und ältere
+entfernen kann, ohne die eines anderen Geräts anzutasten. Deine
+E-Mail-Adresse wird auf der Backup-Seite angezeigt, damit du siehst, welches
+Konto deine Backups enthält; sie wird nur auf deinem Gerät gespeichert. Das
+Anmelde-Token liegt im sicheren Speicher des Geräts. Du kannst die Verbindung
+jederzeit in der App trennen; den Zugriff kannst du auch in deinen
+Google-Kontoeinstellungen widerrufen. Für den Umgang mit deinen Drive-Daten
+gilt die Datenschutzerklärung von Google.</p>
+<p>Die Verwendung von Informationen, die die App über Google-APIs erhält,
+entspricht der
+<a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>,
+einschliesslich der Anforderungen an die eingeschränkte Nutzung (Limited Use).</p>
+<h2>Backup-Archive sind nicht verschlüsselt</h2>
+<p>Ein Backup-Archiv enthält dein ganzes Tourenbuch — Touren, Orte, Tracks, die
+Namen deiner Partner, Notizen und Fotos. Archive, die das Gerät verlassen —
+auf Google Drive hochgeladen, in den gewählten Backup-Ordner kopiert oder
+über das Teilen-Menü von Android verschickt — sind <strong>nicht verschlüsselt</strong>.
+Wer die Datei öffnen kann, kann sie lesen; bewahre sie deshalb dort auf, wo
+nur du Zugriff hast. Eine freiwillige Verschlüsselung der Archive ist
+geplant, aber noch nicht verfügbar.</p>
+<h2>Berechtigungen auf dem Gerät</h2>
+<ul><li><strong>Standort</strong> (ungefähr und genau): nur während du die App benutzt, um deine Position auf der Karte zu zeigen und einen Punkt dort zu setzen, wo du stehst. Deine Position wird nicht gespeichert, ausser du übernimmst sie in eine Tour oder einen Ort, und sie wird nirgends hingeschickt ausser wie oben aufgeführt.</li><li><strong>Fotos</strong>: nur die Fotos, die du auswählst, werden in die App kopiert.</li><li><strong>Internet</strong>: für die oben aufgeführten Dienste.</li><li><strong>Netzwerkstatus</strong>: um zu erkennen, ob das Gerät online ist, und bei Drive-Uploads, die nur über WLAN laufen sollen, ob es im WLAN ist. Dafür wird nichts verschickt.</li></ul>
+<h2>Kauf und Absturzberichte über Google Play</h2>
+<p>Du kaufst und installierst TourBook über Google Play. Google wickelt Kauf,
+Zahlung und Installation nach eigenen Bedingungen und eigener
+<a href="https://policies.google.com/privacy">Datenschutzerklärung</a> ab; der
+Entwickler sieht deine Zahlungsdaten nie. Zu jedem Verkauf erhält der
+Entwickler von Google einen Bestelldatensatz (etwa Bestellnummer, Datum,
+Preis und Land). Wenn dein Gerät Nutzungs- und Diagnosedaten mit Google
+teilt, erhält der Entwickler von Google ausserdem zusammengefasste
+Statistiken und Berichte über Abstürze und «App reagiert nicht»-Ereignisse
+(Android Vitals: Gerätemodell, Android-Version und der technische Zustand der
+App in dem Moment — nie den Inhalt deines Tourenbuchs). Der Entwickler nutzt
+Bestelldatensätze nur für die Buchhaltung und Absturzberichte nur, um Fehler
+zu finden und zu beheben.</p>
+<h2>Teilen und Exportieren</h2>
+<p>Die App gibt Daten nur weiter, wenn du es verlangst — beim Exportieren eines
+Backups, einer GPX-Datei oder einer Auswahl von Touren über das
+Teilen-Menü von Android oder in einen Ordner, den du wählst. Wohin sie gehen,
+entscheidest du.</p>
+<h2>Übermittlung ins Ausland</h2>
+<p>Einige der oben genannten Dienste liegen ausserhalb der Schweiz und der EU:
+Google (Drive, Anmeldung, Standort der Play-Dienste) und GitHub (die Pakete)
+verarbeiten Anfragen in den USA, die OpenStreetMap Foundation (Nominatim und
+die OpenStreetMap-Kacheln) im Vereinigten Königreich. Eine Anfrage erreicht
+sie nur, wenn du die oben genannte Funktion nutzt, und zwar nach den
+Bedingungen und Schutzmassnahmen des jeweiligen Anbieters — siehe die
+<a href="https://policies.google.com/privacy">Datenschutzerklärung von Google</a>, das
+<a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">Privacy Statement von GitHub</a>
+und die <a href="https://osmfoundation.org/wiki/Privacy_Policy">Privacy Policy der OSMF</a>.
+swisstopo ist in der Schweiz.</p>
+<h2>Deine Daten löschen</h2>
+<p>Beim Deinstallieren der App wird alles gelöscht, was sie auf dem Gerät
+gespeichert hat. In der App lassen sich Touren einzeln löschen, und die
+Einstellungen bieten das Löschen der ganzen Datenbank an. Das löscht die
+Datenbank, die Fotos und Tracks, was eine frühere Wiederherstellung
+beiseitegelegt hat, und die Backup-Archive im eigenen Speicher der App, und
+es meldet dich von Google Drive ab (und widerruft den Zugriff der App, wenn
+das Gerät online ist). Die Kopien im gewählten Backup-Ordner und auf Google
+Drive löscht es nicht — die löschst du dort selbst. Heruntergeladene
+Regions- und Höhenpakete und einige Geräteeinstellungen (etwa, ob die
+Regionserkennung eingeschaltet ist) bleiben auf dem Gerät.</p>
+<h2>Rechtsgrundlagen (DSGVO)</h2>
+<p>Soweit die Datenschutz-Grundverordnung der EU gilt, stützt sich die oben
+beschriebene Verarbeitung auf diese Grundlagen:</p>
+<ul><li><strong>Die Funktionen, die du nutzt</strong> — Kartenkacheln, Höhendienst, Pakete, die Bestimmung deiner Position: Art. 6 Abs. 1 lit. b DSGVO, die Bereitstellung der App, die du gekauft hast; die Standortberechtigung selbst erteilst du in Android.</li><li><strong>Regionserkennung</strong> (standardmässig eingeschaltet): Art. 6 Abs. 1 lit. f DSGVO, das berechtigte Interesse, die Region einer Tour ohne Tippen vorzuschlagen; du kannst jederzeit widersprechen, indem du sie in den Einstellungen ausschaltest.</li><li><strong>Backups auf Google Drive</strong>: Art. 6 Abs. 1 lit. a DSGVO, deine Einwilligung beim Verbinden von Drive; du widerrufst sie, indem du die Verbindung in der App trennst oder den Zugriff in deinem Google-Konto entziehst, ohne dass das die zuvor erstellten Backups berührt.</li><li><strong>Bestelldatensätze</strong>: Art. 6 Abs. 1 lit. b und c DSGVO, der Verkauf und die gesetzliche Buchführungspflicht des Entwicklers.</li><li><strong>Absturzberichte</strong>: Art. 6 Abs. 1 lit. f DSGVO, das berechtigte Interesse an einer App, die funktioniert.</li></ul>
+<h2>Deine Rechte</h2>
+<p>Nach der Datenschutz-Grundverordnung der EU (Art. 15–21 DSGVO) und dem
+Schweizer Datenschutzgesetz (DSG, Art. 25 ff.) hast du das Recht auf
+Auskunft, Berichtigung und Löschung deiner Personendaten, auf Einschränkung
+der Verarbeitung und Widerspruch dagegen sowie auf Herausgabe in einem
+übertragbaren Format. Dein Tourenbuch erreicht den Entwickler nie;
+dafür übst du diese Rechte direkt in der App aus — jeder Eintrag lässt sich ansehen, bearbeiten,
+exportieren (Backup, GPX, eine Auswahl von Touren) und löschen — und
+gegenüber den oben genannten Diensten für das, was sie erhalten. Für die
+Bestelldatensätze und Absturzberichte, die Google weitergibt, und für jede
+andere Frage wende dich an die unten genannte Adresse. Du kannst dich
+ausserdem bei einer Datenschutz-Aufsichtsbehörde beschweren, in der
+Schweiz beim Eidgenössischen Datenschutz- und Öffentlichkeitsbeauftragten
+(EDÖB).</p>
+<h2>Kinder</h2>
+<p>Die App richtet sich nicht an Kinder.</p>
+<h2>Änderungen</h2>
+<p>Eine geänderte Fassung dieser Erklärung wird unter dieser Adresse mit einem
+neuen Gültigkeitsdatum veröffentlicht.</p>
+<h2>Kontakt</h2>
+<p>Beda Föhn, foehnetics@gmail.com</p>
+</main>
+<footer><a href="../../de/">Startseite</a> · <a href="../../de/privacy/">Datenschutz</a></footer>
+</body>
+</html>
