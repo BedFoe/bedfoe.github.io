@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TourBook tour list import format — TourBook</title>
+<link rel="canonical" href="https://bedfoe.github.io/tourbook/import-format/">
+<link rel="icon" href="../icon.png">
+<style>
+:root { color-scheme: light dark; --ink: #1c1917; --muted: #57534e; --ground: #fafaf9; --rule: #e7e5e4; --accent: #0f766e; }
+@media (prefers-color-scheme: dark) { :root { --ink: #f5f5f4; --muted: #a8a29e; --ground: #1c1917; --rule: #44403c; --accent: #5eead4; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header, main, footer { max-width: 44rem; margin: 0 auto; padding: 0 16px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 20px; }
+header a.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink); text-decoration: none; }
+header img { width: 36px; height: 36px; border-radius: 9px; }
+nav { display: flex; gap: 14px; font-size: 14px; }
+a { color: var(--accent); }
+h1 { font-size: 1.8rem; line-height: 1.2; margin: 1.6rem 0 0.6rem; }
+h2 { font-size: 1.15rem; margin: 1.8rem 0 0.4rem; }
+p, li { color: var(--ink); }
+code { font-size: 0.9em; overflow-wrap: anywhere; }
+pre { overflow-x: auto; padding: 12px; border: 1px solid var(--rule); border-radius: 6px; font-size: 13px; line-height: 1.45; }
+pre code { overflow-wrap: normal; font-size: inherit; }
+.lead { font-size: 1.1rem; color: var(--muted); }
+.draft { background: #fde68a; color: #1c1917; padding: 8px 12px; border-radius: 6px; font-weight: 600; }
+.table { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--rule); }
+footer { margin-top: 3rem; padding-bottom: 32px; font-size: 14px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 12px; }
+</style>
+</head>
+<body>
+<header>
+<a class="brand" href="../"><img src="../icon.png" alt="">TourBook</a>
+<nav><a href="../privacy/">Privacy policy</a><a href="../de/" hreflang="de">Deutsch</a></nav>
+</header>
+<main>
+<h1>TourBook tour list import format</h1>
+<p>TourBook has no spreadsheet importer. Instead it reads one documented file
+format — a <strong>tour list</strong>, a JSON file named <code>*.tourbook.json</code> — and this page
+describes it completely, so that an AI (or a script) can turn any spreadsheet,
+logbook export or list of tours into such a file <strong>outside</strong> the app. The app
+then imports the file through the same path its tour form saves through, so an
+imported tour is exactly what the same tour typed into the form would be.</p>
+<p>This page is written for the one who produces the file. If you are an AI
+given this page and a spreadsheet: read the whole page, map every column you
+can to a field below, never invent a value the spreadsheet does not hold, and
+write one JSON file that passes the JSON Schema at the end of this page.</p>
+<h2>Workflow</h2>
+<ul><li><strong>Write the file.</strong> Give an AI this page and the spreadsheet (Excel, CSV, a pasted table) and ask it to write a <code>*.tourbook.json</code> file following this format.</li><li><strong>Check it.</strong> In TourBook, <strong>Settings › Tools › Tour list import</strong>, choose the file. The app checks every value first and lists each problem with its JSON path (<code>$.tours[12].segments[0].sport</code>), so a refused value can be fixed in the file (by the AI) and the file chosen again. Tours without a problem can be imported right away; the others are left out until fixed.</li><li><strong>Import.</strong> Each tour is saved in its own transaction: a tour the app cannot save is reported with the reason, and the rest go on.</li><li><strong>Attach the tracks.</strong> <strong>Settings › Tools › GPX import</strong>: the recordings of those days attach to the tours on the same date (a tour without a track is a match).</li><li><strong>Merge the leftovers.</strong> <strong>Settings › Tools › Data quality › Possible duplicates</strong>: merge the tours that now exist twice — for example a friend's list and your own logbook holding the same outing under different names.</li></ul>
+<p>Importing the same file again is safe: a tour is skipped when the logbook
+already holds an active tour <strong>on the same day with the same name</strong> (case and
+spacing ignored). Fix a refused tour in the file and import the whole file
+again; what came in the first time is not doubled.</p>
+<h2>File</h2>
+<p>A tour list is one JSON object, UTF-8:</p>
+<pre><code>{
+  &quot;format&quot;: &quot;tourbook-import&quot;,
+  &quot;version&quot;: 1,
+  &quot;tours&quot;: []
+}</code></pre>
+<p>Every object in the format has a fixed set of fields, listed below.
+<strong>A field that is not listed is refused</strong>, never ignored — a typo such as <code>&quot;gain&quot;</code> for
+<code>&quot;gainM&quot;</code> is reported rather than silently dropped. A field that is optional
+may be left out or set to <code>null</code>; both mean &quot;not recorded&quot;.</p>
+<p><strong>Nothing is guessed.</strong> A value the app does not know — an unknown sport, a
+grade a scale does not have, a field the sport does not record — refuses its
+tour with a precise message. Map what you are sure of; leave out the rest, or
+put it into the tour's <code>description</code>.</p>
+<h2>Fields</h2>
+<h3>File</h3>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>format</code></td><td><code>&quot;tourbook-import&quot;</code></td><td>yes</td><td>Names the format.</td></tr><tr><td><code>version</code></td><td><code>1</code></td><td>yes</td><td>The version of this page. A file of another version is refused.</td></tr><tr><td><code>tours</code></td><td>array of tours</td><td>one of three</td><td>The tours, in any order.</td></tr><tr><td><code>topos</code></td><td>array of topos</td><td>one of three</td><td>Sector topos: routes without a tour (see Capturing a sector topo).</td></tr><tr><td><code>routes</code></td><td>array of topo routes</td><td>one of three</td><td>Only on a sector's screen: routes into that sector, without naming it.</td></tr><tr><td><code>$schema</code></td><td>string</td><td>no</td><td>Ignored — room for a link to the schema.</td></tr></tbody>
+</table></div>
+<p>A file holds tours, topos, or both — at least one of the three lists. On a
+sector's or area's screen it holds no tours.</p>
+<h3>Tour</h3>
+<p>One outing on one day. A multi-day trip is several tours (one per day) in one
+<code>collection</code>.</p>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>date</code></td><td><code>&quot;YYYY-MM-DD&quot;</code></td><td>yes</td><td>The day, a real calendar date (<code>2024-07-14</code>).</td></tr><tr><td><code>name</code></td><td>string</td><td>yes</td><td>The tour's title (<code>&quot;Piz Palü East summit&quot;</code>). Together with the date it identifies the tour for re-runs.</td></tr><tr><td><code>description</code></td><td>string</td><td>no</td><td>Free text: notes, remarks, anything without a field of its own.</td></tr><tr><td><code>region</code></td><td>region</td><td>no</td><td>Where the tour was: country, state, and/or a group of your own.</td></tr><tr><td><code>collection</code></td><td>string</td><td>no</td><td>The collection the tour is filed under (a trip, a season, a project). Created when no collection of that name exists.</td></tr><tr><td><code>partners</code></td><td>array of strings</td><td>no</td><td>Who was there, one name each (<code>[&quot;Anna&quot;, &quot;Beat Muster&quot;]</code>). A name the logbook knows is that person; a new name creates one.</td></tr><tr><td><code>tags</code></td><td>array of strings</td><td>no</td><td>Tags, by name; new ones are created.</td></tr><tr><td><code>segments</code></td><td>array of segments, at least one</td><td>yes</td><td>The sports of the day in order — a hike up and a flight down are two segments.</td></tr></tbody>
+</table></div>
+<h3>Region</h3>
+<p>At least one of <code>country</code>, <code>state</code> and <code>group</code>. The country and state are the
+administrative regions the app files tours under; the group is a region of
+your own — a valley, a range, a ski area (<code>&quot;Saastal&quot;</code>, <code>&quot;Berner Oberland&quot;</code>).</p>
+<p><strong>Give the ISO 3166 codes beside the names whenever you know them</strong> —
+<code>&quot;countryCode&quot;: &quot;CH&quot;</code>, <code>&quot;stateCode&quot;: &quot;CH-VS&quot;</code>. A country or state is
+identified by its code: with it, <code>&quot;Wallis&quot;</code>, <code>&quot;Valais&quot;</code> and <code>&quot;Vallese&quot;</code> are
+the one canton the logbook and the installed region packs already know, and the
+name only labels a region the logbook does not hold yet. Without a code the
+name decides — use the names the logbook already uses (<code>&quot;Schweiz&quot;</code>,
+<code>&quot;Wallis&quot;</code>).</p>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>country</code></td><td>string</td><td>no</td><td>The country (<code>&quot;Schweiz&quot;</code>).</td></tr><tr><td><code>countryCode</code></td><td><code>&quot;CH&quot;</code></td><td>no</td><td>The country's ISO 3166-1 alpha-2 code, in capitals; only beside <code>country</code>.</td></tr><tr><td><code>state</code></td><td>string</td><td>no</td><td>The state, canton or province inside it (<code>&quot;Wallis&quot;</code>).</td></tr><tr><td><code>stateCode</code></td><td><code>&quot;CH-VS&quot;</code></td><td>no</td><td>The state's ISO 3166-2 code, in capitals; only beside <code>state</code>, and beginning with the <code>countryCode</code> when both are given.</td></tr><tr><td><code>group</code></td><td>string</td><td>no</td><td>A group of your own; created when none of that name exists.</td></tr></tbody>
+</table></div>
+<p>A tour's region also decides which peaks, places, areas and sectors its names
+mean (see Finding known places): two peaks called &quot;Schwarzhorn&quot; in different
+states stay two peaks. Give the region whenever the spreadsheet says where a
+tour was.</p>
+<h3>Segment</h3>
+<p>One sport within the tour. Which fields a segment may carry depends on its
+sport — see Sports; a field the sport does not record is refused.</p>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>sport</code></td><td>sport key</td><td>yes</td><td>One key from Sports (<code>&quot;hiking&quot;</code>, <code>&quot;climbing&quot;</code>, …).</td></tr><tr><td><code>name</code></td><td>string</td><td>no</td><td>A label for the segment (<code>&quot;Approach&quot;</code>, <code>&quot;Flight down&quot;</code>).</td></tr><tr><td><code>distanceKm</code></td><td>number from 0 to 1,000</td><td>no</td><td>Distance in kilometres (<code>12.5</code>).</td></tr><tr><td><code>gainM</code></td><td>number from 0 to 15,000</td><td>no</td><td>Height gained in metres (<code>1100</code>).</td></tr><tr><td><code>lossM</code></td><td>number from 0 to 15,000</td><td>no</td><td>Height lost in metres.</td></tr><tr><td><code>duration</code></td><td><code>&quot;h:mm&quot;</code>, at most <code>&quot;48:00&quot;</code></td><td>no</td><td>Time taken, hours and minutes (<code>&quot;5:30&quot;</code>; <code>&quot;5:30:15&quot;</code> with seconds). A decimal such as <code>5.5</code> is refused — write <code>&quot;5:30&quot;</code>. A longer outing is several tours.</td></tr><tr><td><code>grade</code></td><td>grades</td><td>no</td><td>The day's own difficulty, only on the sports marked <strong>segment grade</strong> (<code>{ &quot;hiking&quot;: &quot;T3&quot; }</code>). Technical sports grade their routes instead.</td></tr><tr><td><code>peaks</code></td><td>array of peaks</td><td>no</td><td>Summits of this segment.</td></tr><tr><td><code>places</code></td><td>array of places</td><td>no</td><td>Huts, passes, trailheads, villages.</td></tr><tr><td><code>routes</code></td><td>array of routes</td><td>no</td><td>The routes climbed, skied or walked — with their grades.</td></tr></tbody>
+</table></div>
+<h3>Peak</h3>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>name</code></td><td>string</td><td>yes</td><td>The summit's name (<code>&quot;Piz Palü&quot;</code>).</td></tr><tr><td><code>lat</code></td><td>number</td><td>no</td><td>Latitude in degrees (WGS84), with <code>lon</code>.</td></tr><tr><td><code>lon</code></td><td>number</td><td>no</td><td>Longitude in degrees, with <code>lat</code>.</td></tr><tr><td><code>elevationM</code></td><td>number from −500 to 9,000</td><td>no</td><td>Height in metres.</td></tr><tr><td><code>outcome</code></td><td><code>&quot;reached&quot;</code> or <code>&quot;turned_back&quot;</code></td><td>no</td><td>Whether the summit was reached. Left out, the routes at the peak decide (a route turned back from makes the peak &quot;turned back&quot;), else &quot;reached&quot;.</td></tr></tbody>
+</table></div>
+<p>A peak the logbook or an installed region pack already knows is that peak (see
+Finding known places); its position and height stay its own. The file's
+position and height are written only on a peak new to both — and the
+position is what tells two summits of one name apart.</p>
+<h3>Place</h3>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>name</code></td><td>string</td><td>yes</td><td>The place's name (<code>&quot;Diavolezza&quot;</code>, <code>&quot;Cabane de Moiry&quot;</code>).</td></tr><tr><td><code>lat</code></td><td>number</td><td>no</td><td>Latitude in degrees, with <code>lon</code>.</td></tr><tr><td><code>lon</code></td><td>number</td><td>no</td><td>Longitude in degrees, with <code>lat</code>.</td></tr><tr><td><code>elevationM</code></td><td>number from −500 to 9,000</td><td>no</td><td>Height in metres.</td></tr></tbody>
+</table></div>
+<h3>Route</h3>
+<p>A route visited on the segment: where it lies, its grade, and how it went.
+Where it lies is <strong>exactly one</strong> of <code>peak</code>, <code>place</code> or <code>sector</code> (a sector with
+its <code>area</code> if known, a bouldering block with its <code>sector</code> and <code>boulder</code>), of a
+kind the sport hangs routes off (<strong>routes on</strong> in Sports).</p>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>name</code></td><td>string</td><td>yes</td><td>The route's name (<code>&quot;Normal route&quot;</code>, <code>&quot;Motörhead&quot;</code>).</td></tr><tr><td><code>peak</code></td><td>string</td><td>one of three</td><td>The summit the route leads to.</td></tr><tr><td><code>place</code></td><td>string</td><td>one of three</td><td>A place the route starts from or leads to (a gorge, a ski area).</td></tr><tr><td><code>area</code></td><td>string</td><td>no</td><td>The climbing area a sector lies in (<code>&quot;Gadmen&quot;</code>).</td></tr><tr><td><code>sector</code></td><td>string</td><td>one of three</td><td>The crag sector (<code>&quot;Wendenstöcke&quot;</code>); for bouldering the boulder sector.</td></tr><tr><td><code>boulder</code></td><td>string</td><td>bouldering</td><td>The block a problem is on, inside its <code>sector</code>.</td></tr><tr><td><code>grades</code></td><td>grades</td><td>no</td><td>The route's grade per scale (<code>{ &quot;alpine&quot;: &quot;ZS&quot;, &quot;uiaa&quot;: &quot;III&quot; }</code>).</td></tr><tr><td><code>pitches</code></td><td>array of pitches</td><td>no</td><td>Pitch by pitch, on sports with pitches.</td></tr><tr><td><code>style</code></td><td>style</td><td>no</td><td>How it was climbed (see Visit answers), on the <strong>style</strong> sports.</td></tr><tr><td><code>role</code></td><td>role</td><td>no</td><td>Led, followed or alternated, on the rope sports.</td></tr><tr><td><code>attempts</code></td><td>whole number from 1 to 999</td><td>no</td><td>Goes needed, on the <strong>style</strong> sports (a project that took 12 tries).</td></tr><tr><td><code>outcome</code></td><td>outcome</td><td>no</td><td>Reached or turned back, on the <strong>outcome</strong> sports.</td></tr></tbody>
+</table></div>
+<p>A route <strong>already in the logbook</strong> at that location, with that name and
+sport, is that route: the visit is added to it and its grades and pitches stay
+as the logbook has them. A new route is created from the file's <code>grades</code> and
+<code>pitches</code>. A sector with its <code>area</code> is found by name inside that area (the
+area itself by name in the tour's region); a sector named without its area
+is the logbook's sector of that name and discipline in the tour's region —
+or, without a region, the only one of that name anywhere — and else a new
+sector without an area. Give the <code>area</code> whenever the spreadsheet has it.</p>
+<p>Left out, the visit answers take the form's defaults: led, <code>onsight</code> on a
+route never climbed before (<code>flash</code> for a boulder), <code>redpoint</code> on one tried
+but not sent, <code>repeat</code> on one sent before; <code>reached</code> on the outcome sports.</p>
+<h3>Pitch</h3>
+<p>On sports with pitches. For a new route the pitches are its topo, in order;
+for a route already in the logbook the file must list as many pitches as the
+logbook holds (the visit's role and style per pitch), or the tour is refused.</p>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>grades</code></td><td>grades</td><td>no</td><td>The pitch's grade (<code>{ &quot;french&quot;: &quot;6b&quot; }</code>), in a rock, ice or mixed scale.</td></tr><tr><td><code>lengthM</code></td><td>number from 0 to 500</td><td>no</td><td>The pitch's length in metres.</td></tr><tr><td><code>role</code></td><td>role</td><td>no</td><td>This pitch's role, when it differs from the route's.</td></tr><tr><td><code>style</code></td><td>style</td><td>no</td><td>This pitch's style, when it differs from the route's.</td></tr></tbody>
+</table></div>
+<p>A climbing route's grade is its hardest pitch's, and its length the sum of the
+pitch lengths. A single-pitch route needs no <code>pitches</code>: its <code>grades</code> are pitch 1.</p>
+<h3>Topo</h3>
+<p>One sector's topo: where it is and its routes — no tour, no visit. A rope
+sector lists <code>routes</code>, a boulder sector its <code>boulders</code> (blocks) with their
+problems; the other list is refused.</p>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>area</code></td><td>topo area</td><td>in the tour list import</td><td>The climbing area the sector lies in. On a sector's or area's screen it may be left out; given, it must be that area.</td></tr><tr><td><code>sector</code></td><td>topo sector</td><td>except on a sector's screen</td><td>The sector. On a sector's screen it may be left out; given, it must be that sector.</td></tr><tr><td><code>routes</code></td><td>array of topo routes</td><td>rope sector</td><td>The routes, at least one.</td></tr><tr><td><code>boulders</code></td><td>array of topo blocks</td><td>boulder sector</td><td>The blocks, at least one.</td></tr></tbody>
+</table></div>
+<h3>Topo area</h3>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>name</code></td><td>string</td><td>yes</td><td>The area's name (<code>&quot;Balmfluh&quot;</code>). Found by name in its region (see Finding known places), else created.</td></tr><tr><td><code>lat</code></td><td>number</td><td>no</td><td>Latitude in degrees, with <code>lon</code>.</td></tr><tr><td><code>lon</code></td><td>number</td><td>no</td><td>Longitude in degrees, with <code>lat</code>.</td></tr><tr><td><code>elevationM</code></td><td>number from −500 to 9,000</td><td>no</td><td>Height in metres.</td></tr><tr><td><code>region</code></td><td>region</td><td>no</td><td>Country and state the area lies in, and a group of your own that holds it. Without a region the area is found only when its name is unique in the logbook.</td></tr></tbody>
+</table></div>
+<h3>Topo sector</h3>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>name</code></td><td>string</td><td>yes</td><td>The sector's name (<code>&quot;Hauptwand&quot;</code>). Found by name inside its area, else created.</td></tr><tr><td><code>discipline</code></td><td><code>&quot;rope&quot;</code> or <code>&quot;boulder&quot;</code></td><td>no</td><td>A rope sector (the default) or a boulder sector.</td></tr><tr><td><code>lat</code></td><td>number</td><td>no</td><td>Latitude in degrees, with <code>lon</code>.</td></tr><tr><td><code>lon</code></td><td>number</td><td>no</td><td>Longitude in degrees, with <code>lat</code>.</td></tr><tr><td><code>elevationM</code></td><td>number from −500 to 9,000</td><td>no</td><td>Height in metres.</td></tr></tbody>
+</table></div>
+<h3>Topo block</h3>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>name</code></td><td>string</td><td>yes</td><td>The block's name (<code>&quot;Ei&quot;</code>). Found by name inside its sector, else created.</td></tr><tr><td><code>lat</code></td><td>number</td><td>no</td><td>Latitude in degrees, with <code>lon</code>.</td></tr><tr><td><code>lon</code></td><td>number</td><td>no</td><td>Longitude in degrees, with <code>lat</code>.</td></tr><tr><td><code>elevationM</code></td><td>number from −500 to 9,000</td><td>no</td><td>Height in metres.</td></tr><tr><td><code>routes</code></td><td>array of topo routes</td><td>yes</td><td>The problems on the block, at least one.</td></tr></tbody>
+</table></div>
+<h3>Topo route</h3>
+<p>A route as the topo describes it. Which fields it may carry depends on its
+sport, as on a tour's route.</p>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>topoIndex</code></td><td>whole number from 0 to 9,999</td><td>no</td><td>The route's number on the topo or the wall (some topos start at 0). The sector lists its routes by it, then the unnumbered ones by name.</td></tr><tr><td><code>name</code></td><td>string</td><td>yes</td><td>The route's name (<code>&quot;Bazillus&quot;</code>).</td></tr><tr><td><code>sport</code></td><td>sport key</td><td>no</td><td><code>climbing</code> on a rope sector and <code>bouldering</code> on a block when left out; <code>ice_climbing</code> and <code>mixed_climbing</code> also lie on a rope sector.</td></tr><tr><td><code>grades</code></td><td>grades</td><td>no</td><td>The route's grade (<code>{ &quot;french&quot;: &quot;7b&quot; }</code>).</td></tr><tr><td><code>lengthM</code></td><td>number from 0 to 3,000</td><td>no</td><td>The route's length in metres (<code>&quot;15m&quot;</code> → <code>15</code>).</td></tr><tr><td><code>pitches</code></td><td>array of topo pitches</td><td>no</td><td>A multi-pitch route's pitches in order; left out, the route is one pitch. Pitches without a grade leave the route's <code>grades</code> as its grade until a pitch is graded.</td></tr><tr><td><code>character</code></td><td><code>&quot;plaisir&quot;</code>, <code>&quot;partly_bolted&quot;</code>, <code>&quot;trad&quot;</code> or <code>&quot;alpine&quot;</code></td><td>no</td><td>How it is protected, on sport climbing: well bolted, partly bolted, own gear, alpine. Left out, a new route takes <code>plaisir</code>.</td></tr><tr><td><code>note</code></td><td>string</td><td>no</td><td>The topo's text: description, first ascent, &quot;extension of …&quot;.</td></tr></tbody>
+</table></div>
+<h3>Topo pitch</h3>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>grades</code></td><td>grades</td><td>no</td><td>The pitch's grade (<code>{ &quot;french&quot;: &quot;6b&quot; }</code>).</td></tr><tr><td><code>lengthM</code></td><td>number from 0 to 500</td><td>no</td><td>The pitch's length in metres.</td></tr></tbody>
+</table></div>
+<h2>Grades</h2>
+<p>A grades object maps a <strong>scale</strong> to a <strong>grade token</strong> of that scale:
+<code>{ &quot;french&quot;: &quot;6a+&quot; }</code>, <code>{ &quot;alpine&quot;: &quot;ZS-&quot;, &quot;uiaa&quot;: &quot;IV&quot; }</code>. Scales of one
+family (French, UIAA, YDS and Norwegian are all <strong>rock</strong>; Font and V are <strong>boulder</strong>) are
+one grade — give one of them, the one the spreadsheet uses. A token must be
+written exactly as in the table below (Font and V also accept lower case);
+anything else is refused. A sport accepts the scales listed for it in
+Sports.</p>
+<p>Convert nothing yourself: a grade written in UIAA stays UIAA in the file, and
+the app shows it in whichever scale the user reads.</p>
+<h2>Grade scales</h2>
+<div class="table"><table>
+<thead><tr><th>Scale</th><th>Family</th><th>Tokens</th></tr></thead>
+<tbody><tr><td><code>french</code></td><td>rock</td><td><code>1</code> <code>2</code> <code>3a</code> <code>3b</code> <code>3c</code> <code>4a</code> <code>4b</code> <code>4c</code> <code>5a</code> <code>5a+</code> <code>5b</code> <code>5b+</code> <code>5c</code> <code>5c+</code> <code>6a</code> <code>6a+</code> <code>6b</code> <code>6b+</code> <code>6c</code> <code>6c+</code> <code>7a</code> <code>7a+</code> <code>7b</code> <code>7b+</code> <code>7c</code> <code>7c+</code> <code>8a</code> <code>8a+</code> <code>8b</code> <code>8b+</code> <code>8c</code> <code>8c+</code> <code>9a</code> <code>9a+</code> <code>9b</code> <code>9b+</code> <code>9c</code></td></tr><tr><td><code>uiaa</code></td><td>rock</td><td><code>I</code> <code>II</code> <code>III</code> <code>IV</code> <code>IV+</code> <code>V-</code> <code>V</code> <code>V+</code> <code>VI-</code> <code>VI</code> <code>VI+</code> <code>VII-</code> <code>VII</code> <code>VII+</code> <code>VIII-</code> <code>VIII</code> <code>VIII+</code> <code>IX-</code> <code>IX</code> <code>IX+</code> <code>X-</code> <code>X</code> <code>X+</code> <code>XI-</code> <code>XI</code> <code>XI+</code> <code>XII-</code> <code>XII</code></td></tr><tr><td><code>yds</code></td><td>rock</td><td><code>5.0</code> <code>5.1</code> <code>5.2</code> <code>5.3</code> <code>5.4</code> <code>5.5</code> <code>5.6</code> <code>5.7</code> <code>5.8</code> <code>5.9</code> <code>5.10a</code> <code>5.10b</code> <code>5.10c</code> <code>5.10d</code> <code>5.11a</code> <code>5.11b</code> <code>5.11c</code> <code>5.11d</code> <code>5.12a</code> <code>5.12b</code> <code>5.12c</code> <code>5.12d</code> <code>5.13a</code> <code>5.13b</code> <code>5.13c</code> <code>5.13d</code> <code>5.14a</code> <code>5.14b</code> <code>5.14c</code> <code>5.14d</code> <code>5.15a</code> <code>5.15b</code> <code>5.15c</code> <code>5.15d</code></td></tr><tr><td><code>norwegian</code></td><td>rock</td><td><code>1-</code> <code>1</code> <code>1+</code> <code>2-</code> <code>2</code> <code>2+</code> <code>3-</code> <code>3</code> <code>3+</code> <code>4-</code> <code>4</code> <code>4+</code> <code>5-</code> <code>5</code> <code>5+</code> <code>6-</code> <code>6</code> <code>6+</code> <code>7-</code> <code>7</code> <code>7+</code> <code>8-</code> <code>8</code> <code>8+</code> <code>9-</code> <code>9</code> <code>9+</code> <code>10-</code> <code>10</code> <code>10+</code> <code>11-</code> <code>11</code> <code>11+</code></td></tr><tr><td><code>font</code></td><td>boulder</td><td><code>3</code> <code>4</code> <code>4+</code> <code>5</code> <code>5+</code> <code>6A</code> <code>6A+</code> <code>6B</code> <code>6B+</code> <code>6C</code> <code>6C+</code> <code>7A</code> <code>7A+</code> <code>7B</code> <code>7B+</code> <code>7C</code> <code>7C+</code> <code>8A</code> <code>8A+</code> <code>8B</code> <code>8B+</code> <code>8C</code> <code>8C+</code> <code>9A</code></td></tr><tr><td><code>vscale</code></td><td>boulder</td><td><code>VB</code> <code>V0</code> <code>V1</code> <code>V2</code> <code>V3</code> <code>V4</code> <code>V5</code> <code>V6</code> <code>V7</code> <code>V8</code> <code>V9</code> <code>V10</code> <code>V11</code> <code>V12</code> <code>V13</code> <code>V14</code> <code>V15</code> <code>V16</code> <code>V17</code></td></tr><tr><td><code>ice</code></td><td>ice</td><td><code>WI1</code> <code>WI2</code> <code>WI3</code> <code>WI4</code> <code>WI5</code> <code>WI6</code> <code>WI7</code></td></tr><tr><td><code>alpine</code></td><td>alpine</td><td><code>L</code> <code>WS-</code> <code>WS</code> <code>WS+</code> <code>ZS-</code> <code>ZS</code> <code>ZS+</code> <code>S-</code> <code>S</code> <code>S+</code> <code>SS-</code> <code>SS</code> <code>SS+</code> <code>AS</code> <code>EX</code></td></tr><tr><td><code>mixed</code></td><td>mixed</td><td><code>M1</code> <code>M2</code> <code>M3</code> <code>M4</code> <code>M5</code> <code>M6</code> <code>M7</code> <code>M8</code> <code>M9</code> <code>M10</code> <code>M11</code> <code>M12</code></td></tr><tr><td><code>hiking</code></td><td>hiking</td><td><code>T1</code> <code>T2</code> <code>T3</code> <code>T4</code> <code>T4+</code> <code>T5</code> <code>T5+</code> <code>T6</code></td></tr><tr><td><code>mtb</code></td><td>mtb</td><td><code>S0</code> <code>S1</code> <code>S2</code> <code>S3</code> <code>S4</code> <code>S5</code></td></tr><tr><td><code>via_ferrata</code></td><td>via_ferrata</td><td><code>K1</code> <code>K2</code> <code>K3</code> <code>K4</code> <code>K5</code> <code>K6</code></td></tr><tr><td><code>snowshoe</code></td><td>snowshoe</td><td><code>WT1</code> <code>WT2</code> <code>WT3</code> <code>WT4</code> <code>WT5</code> <code>WT6</code></td></tr></tbody>
+</table></div>
+<p>The SAC alpine scale is written with its German letters: <code>L</code> easy, <code>WS</code>
+moderately difficult, <code>ZS</code> fairly difficult, <code>S</code> difficult, <code>SS</code> very
+difficult, <code>AS</code> extremely difficult, <code>EX</code> excessively difficult (French <code>F</code>,
+<code>PD</code>, <code>AD</code>, <code>D</code>, <code>TD</code>, <code>ED</code>, <code>ABO</code> map to them in that order).</p>
+<h2>Sports</h2>
+<p>What each sport records. <strong>Metrics</strong> are the segment fields it takes,
+<strong>destinations</strong> whether its segments list peaks and places, <strong>routes on</strong> the
+location kinds its routes hang off, <strong>pitches</strong> whether its routes have them
+(<strong>required</strong>: every route is at least one pitch), <strong>visit</strong> what a route visit
+answers, <strong>scales</strong> the grade scales it accepts, <strong>segment grade</strong> whether the
+segment itself takes a <code>grade</code>.</p>
+<div class="table"><table>
+<thead><tr><th>Key</th><th>Name</th><th>Metrics</th><th>Destinations</th><th>Routes on</th><th>Pitches</th><th>Visit</th><th>Scales</th><th>Segment grade</th></tr></thead>
+<tbody><tr><td><code>hiking</code></td><td>Hiking</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>peaks</code> <code>places</code></td><td>peak, place</td><td>—</td><td><code>outcome</code></td><td><code>hiking</code></td><td>yes</td></tr><tr><td><code>scrambling</code></td><td>Scrambling</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>peaks</code> <code>places</code></td><td>peak, place</td><td>—</td><td><code>outcome</code></td><td><code>hiking</code> <code>french</code> <code>uiaa</code> <code>yds</code> <code>norwegian</code></td><td>—</td></tr><tr><td><code>alpine</code></td><td>Mountaineering</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>peaks</code> <code>places</code></td><td>peak, place</td><td>optional</td><td><code>outcome</code></td><td><code>alpine</code> <code>french</code> <code>uiaa</code> <code>yds</code> <code>norwegian</code></td><td>—</td></tr><tr><td><code>climbing</code></td><td>Climbing</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>peaks</code> <code>places</code></td><td>sector, peak</td><td>required</td><td><code>style</code> <code>role</code> <code>attempts</code></td><td><code>french</code> <code>uiaa</code> <code>yds</code> <code>norwegian</code></td><td>—</td></tr><tr><td><code>ski_touring</code></td><td>Ski Touring</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>peaks</code> <code>places</code></td><td>peak, place</td><td>—</td><td><code>outcome</code></td><td><code>alpine</code></td><td>—</td></tr><tr><td><code>xc_skiing</code></td><td>Cross-Country Skiing</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>places</code></td><td>place</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td><code>running</code></td><td>Running</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>places</code></td><td>place</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td><code>orienteering</code></td><td>Orienteering</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>places</code></td><td>place</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td><code>mtb</code></td><td>Mountain Biking</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>peaks</code> <code>places</code></td><td>place, peak</td><td>—</td><td><code>outcome</code></td><td><code>mtb</code></td><td>yes</td></tr><tr><td><code>road_cycling</code></td><td>Road Cycling</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>places</code></td><td>place</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td><code>trail_running</code></td><td>Trail Running</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>peaks</code> <code>places</code></td><td>peak, place</td><td>—</td><td><code>outcome</code></td><td><code>hiking</code></td><td>yes</td></tr><tr><td><code>ice_climbing</code></td><td>Ice Climbing</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>peaks</code> <code>places</code></td><td>sector, peak</td><td>required</td><td><code>style</code> <code>role</code> <code>attempts</code></td><td><code>ice</code></td><td>—</td></tr><tr><td><code>mixed_climbing</code></td><td>Mixed Climbing</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>peaks</code> <code>places</code></td><td>sector, peak</td><td>required</td><td><code>style</code> <code>role</code> <code>attempts</code></td><td><code>mixed</code> <code>ice</code></td><td>—</td></tr><tr><td><code>paragliding</code></td><td>Paragliding</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>peaks</code> <code>places</code></td><td>place, peak</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td><code>bouldering</code></td><td>Bouldering</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>places</code></td><td>boulder</td><td>—</td><td><code>style</code> <code>attempts</code></td><td><code>font</code> <code>vscale</code></td><td>—</td></tr><tr><td><code>ski_mountaineering</code></td><td>Ski Mountaineering</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>peaks</code> <code>places</code></td><td>peak, place</td><td>optional</td><td><code>outcome</code></td><td><code>alpine</code> <code>french</code> <code>uiaa</code> <code>yds</code> <code>norwegian</code></td><td>—</td></tr><tr><td><code>via_ferrata</code></td><td>Via Ferrata</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>peaks</code> <code>places</code></td><td>peak, place</td><td>—</td><td><code>outcome</code></td><td><code>via_ferrata</code></td><td>—</td></tr><tr><td><code>snowshoeing</code></td><td>Snowshoeing</td><td><code>distanceKm</code> <code>gainM</code> <code>lossM</code> <code>duration</code></td><td><code>peaks</code> <code>places</code></td><td>peak, place</td><td>—</td><td><code>outcome</code></td><td><code>snowshoe</code></td><td>yes</td></tr></tbody>
+</table></div>
+<p>Choosing the sport: a glacier tour or a high summit on foot is <code>alpine</code>
+(mountaineering); a ski tour to a high summit, roped where it gets steep,
+<code>ski_mountaineering</code>; a plain ski tour <code>ski_touring</code>; sport and multi-pitch
+rock routes <code>climbing</code>; T-graded walks <code>hiking</code>, T4–T6 terrain with hands on
+rock <code>scrambling</code>. Indoor climbing has no sport — leave it out or ask.</p>
+<h2>Visit answers</h2>
+<h3>Styles</h3>
+<p>On the <strong>style</strong> sports (<code>style</code> in the <strong>visit</strong> column), the route's and each
+pitch's <code>style</code>. Bouldering takes <code>flash</code>, <code>redpoint</code>, <code>repeat</code>, <code>attempt</code> and
+<code>onsight</code> only.</p>
+<div class="table"><table>
+<thead><tr><th>Style</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>onsight</code></td><td>First go, no prior information, no fall.</td></tr><tr><td><code>flash</code></td><td>First go with prior information (beta), no fall.</td></tr><tr><td><code>redpoint</code></td><td>Led free after earlier tries.</td></tr><tr><td><code>repeat</code></td><td>Climbed free again, sent before.</td></tr><tr><td><code>french_free</code></td><td>Pulled on gear or bolts in places (A0).</td></tr><tr><td><code>aid</code></td><td>Climbed on gear.</td></tr><tr><td><code>attempt</code></td><td>Not topped out — a fall-off, a retreat.</td></tr></tbody>
+</table></div>
+<h3>Roles</h3>
+<p>On the rope sports, the route's <code>role</code> and each pitch's.</p>
+<div class="table"><table>
+<thead><tr><th>Role</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>lead</code></td><td>Led every pitch (the default).</td></tr><tr><td><code>follow</code></td><td>Seconded.</td></tr><tr><td><code>alternating</code></td><td>Swung leads.</td></tr></tbody>
+</table></div>
+<h3>Outcomes</h3>
+<p>On the <strong>outcome</strong> sports, a route's <code>outcome</code>; on every sport with peaks, a
+peak's <code>outcome</code>.</p>
+<div class="table"><table>
+<thead><tr><th>Outcome</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>reached</code></td><td>Got to the top or the end (the default).</td></tr><tr><td><code>turned_back</code></td><td>Turned back before it.</td></tr></tbody>
+</table></div>
+<h2>Values</h2>
+<ul><li><strong>Dates</strong> are <code>YYYY-MM-DD</code> — convert <code>14.07.2024</code>, <code>7/14/24</code> and Excel serial numbers (<code>45487</code> is 14 July 2024) to <code>2024-07-14</code>.</li><li><strong>Numbers</strong> are JSON numbers with a decimal point: <code>12.5</code>, not <code>&quot;12,5&quot;</code> and not <code>&quot;12.5 km&quot;</code>. Strip units and thousands separators (<code>1'100 m</code> → <code>1100</code>). Convert miles to kilometres and feet to metres.</li><li><strong>Bounds.</strong> Every number has a plausible range, given in its field's type (a day's distance up to 1,000 km, its gain and loss up to 15,000 m, its duration up to 48 hours, a height from −500 to 9,000 m, a route up to 3,000 m, a pitch up to 500 m). A value outside it is refused with the range — almost always a unit mixed up: metres written as kilometres, feet as metres, minutes as hours.</li><li><strong>Durations</strong> are <code>&quot;h:mm&quot;</code> strings: <code>&quot;5:30&quot;</code>, <code>&quot;0:45&quot;</code>, <code>&quot;12:05&quot;</code>. A time written as <code>5.5 h</code> is <code>&quot;5:30&quot;</code>; <code>330 min</code> is <code>&quot;5:30&quot;</code>.</li><li><strong>Text</strong> is trimmed; an empty text is &quot;not recorded&quot;.</li><li><strong>Names</strong> (partners, tags, peaks, places, sectors, routes, collections) are matched to what the logbook holds by their spelling, ignoring case and extra spaces — <code>&quot;Piz Palü&quot;</code> and <code>&quot;piz palü&quot;</code> are one, <code>&quot;Piz Palu&quot;</code> is another. Keep one spelling per thing throughout the file.</li></ul>
+<h2>What the import does</h2>
+<ul><li>Each tour is saved like a tour entered in the form: partners, tags and the collection by name (created when new), the region as country → state plus a group, peaks, places, areas and loose sectors as described under Finding known places (created when nothing is known, with the file's position and height), sectors within their area, blocks within their sector, routes by name at their location and sport (created when new, from the file's grades and pitches), and every visit with its answers. The statistics, challenge lists and grade overviews see an imported tour as any other.</li><li><strong>One transaction per tour</strong>: a tour either comes in whole — with every location and route it created — or not at all. The import reports each tour as imported, already present, or failed with its reason, and goes on after a failure.</li><li><strong>No network</strong>: nothing is looked up online during the import — only the region packs installed on the device. A new peak with no position stays without one; data care (Settings › Tools › Data quality) later proposes positions, heights and regions from the installed packs.</li><li><strong>Already present</strong> — same day, same name, not in the trash — is skipped.</li><li>A sector of the other discipline (a rope sector named where a bouldering route needs a boulder sector of the same name) refuses its tour.</li></ul>
+<h3>Finding known places</h3>
+<p>A peak, place, area or loose sector named in the file is matched to what the
+logbook already holds — **including the peaks and places it took from a region
+pack**, which most migrated and picked ones are — by its name (case and spacing
+ignored) and kind:</p>
+<ul><li><strong>With a country or state</strong> in the region: the logbook's rows of that name in it or in a state under it — filed there, placed there by their position, or holding a sector that is. None there: a row nothing places in any region at all (an old area without a region or positions). <strong>With only a group</strong>: the rows in the group, else every row. <strong>Without a region</strong>: every row.</li><li><strong>One</strong> is that row. <strong>Several</strong>: the one within 200 m of the file's <code>lat</code>/<code>lon</code>; else — with a region — the one filed most precisely under it (the region itself before a state under it before one placed only through its sectors); else the tour (or topo) is refused as <strong>ambiguous</strong>, saying how many there are: add <code>lat</code> and <code>lon</code> (or the region) in the file.</li><li><strong>None in the logbook</strong> (peaks and places): the installed region packs, by name, in the file's state or country (everywhere without one) — one feature becomes the logbook's peak with the pack's position and height; several are told apart by <code>lat</code>/<code>lon</code> as above, else refused as ambiguous.</li><li><strong>Nothing known</strong>: a new row, filed under the tour's region.</li></ul>
+<h2>Mapping a spreadsheet</h2>
+<p>Typical columns and where they go (the column names are examples — German
+logbooks often use the ones on the left):</p>
+<div class="table"><table>
+<thead><tr><th>Column</th><th>Field</th></tr></thead>
+<tbody><tr><td>Datum, Date</td><td><code>date</code></td></tr><tr><td>Tour, Ziel, Name, Titel</td><td><code>name</code></td></tr><tr><td>Sportart, Aktivität, Typ</td><td><code>segments[].sport</code> — map each value to a key from Sports (Wandern → <code>hiking</code>, Hochtour → <code>alpine</code>, Skitour → <code>ski_touring</code>, Skihochtour → <code>ski_mountaineering</code>, Klettern → <code>climbing</code>, Bouldern → <code>bouldering</code>, Klettersteig → <code>via_ferrata</code>, Schneeschuh → <code>snowshoeing</code>, Bike/MTB → <code>mtb</code>, Velo/Rennrad → <code>road_cycling</code>, Laufen/Joggen → <code>running</code>, Trailrunning → <code>trail_running</code>, Langlauf → <code>xc_skiing</code>, Gleitschirm → <code>paragliding</code>, Eisklettern → <code>ice_climbing</code>)</td></tr><tr><td>Partner, Begleitung, Mit</td><td><code>partners</code> — split &quot;Anna, Beat &amp; Carla&quot; into three names</td></tr><tr><td>Gipfel, Berg</td><td><code>segments[].peaks[].name</code></td></tr><tr><td>Hütte, Ort, Pass, Start</td><td><code>segments[].places[].name</code></td></tr><tr><td>Höhenmeter, Aufstieg, Hm ↑</td><td><code>segments[].gainM</code></td></tr><tr><td>Abstieg, Hm ↓</td><td><code>segments[].lossM</code></td></tr><tr><td>Distanz, Strecke, km</td><td><code>segments[].distanceKm</code></td></tr><tr><td>Zeit, Dauer, Gehzeit</td><td><code>segments[].duration</code> as <code>&quot;h:mm&quot;</code></td></tr><tr><td>Schwierigkeit, Grad, Bewertung</td><td>a route's <code>grades</code> (or the segment's <code>grade</code> on hiking, trail running, MTB, snowshoeing) with the scale the value is written in: <code>T3</code> → <code>hiking</code>, <code>ZS</code> → <code>alpine</code>, <code>6a</code> → <code>french</code>, <code>V+</code> → <code>uiaa</code>, <code>WT2</code> → <code>snowshoe</code>, <code>K3</code> → <code>via_ferrata</code></td></tr><tr><td>Route, Weg, Linie</td><td><code>segments[].routes[].name</code>, on its <code>peak</code> or <code>sector</code></td></tr><tr><td>Gebiet, Klettergebiet</td><td>a route's <code>area</code></td></tr><tr><td>Sektor, Wand</td><td>a route's <code>sector</code></td></tr><tr><td>Stil, Begehung</td><td>a route's <code>style</code> (OS → <code>onsight</code>, Flash → <code>flash</code>, RP/Rotpunkt → <code>redpoint</code>, AF/A0 → <code>french_free</code>, Versuch → <code>attempt</code>)</td></tr><tr><td>Seillängen</td><td>the number of <code>pitches</code> (with their grades when listed)</td></tr><tr><td>Gipfel erreicht? Abbruch, Umkehr</td><td>a peak's <code>outcome</code> (<code>turned_back</code> for an abandoned summit)</td></tr><tr><td>Region, Kanton, Land, Gebiet</td><td><code>region</code> (<code>country</code>, <code>state</code> with their ISO codes <code>countryCode</code>, <code>stateCode</code>; a valley or range as <code>group</code>)</td></tr><tr><td>Bemerkung, Notizen, Kommentar</td><td><code>description</code></td></tr><tr><td>Saison, Reise, Projekt</td><td><code>collection</code></td></tr><tr><td>Stichworte, Labels</td><td><code>tags</code></td></tr></tbody>
+</table></div>
+<p>A row with two sports (hike in, climb, walk out; ski up, fly down) is one tour
+with several segments. Two rows on the same day for one outing are one tour;
+two outings on one day are two tours with different names. When a row does
+not have a name, build one from what it has (&quot;Pizol&quot;, &quot;Pizol – Wildsee&quot;),
+since the name identifies the tour on a re-run.</p>
+<h2>Example</h2>
+<pre><code>{
+  &quot;format&quot;: &quot;tourbook-import&quot;,
+  &quot;version&quot;: 1,
+  &quot;tours&quot;: [
+    {
+      &quot;date&quot;: &quot;2024-06-02&quot;,
+      &quot;name&quot;: &quot;Pizol – Five lakes&quot;,
+      &quot;description&quot;: &quot;Hot day, the upper lakes still half frozen.&quot;,
+      &quot;region&quot;: { &quot;country&quot;: &quot;Schweiz&quot;, &quot;countryCode&quot;: &quot;CH&quot;, &quot;state&quot;: &quot;St. Gallen&quot;, &quot;stateCode&quot;: &quot;CH-SG&quot; },
+      &quot;partners&quot;: [&quot;Anna&quot;, &quot;Beat&quot;],
+      &quot;tags&quot;: [&quot;Family&quot;],
+      &quot;segments&quot;: [
+        {
+          &quot;sport&quot;: &quot;hiking&quot;,
+          &quot;distanceKm&quot;: 12.5,
+          &quot;gainM&quot;: 1100,
+          &quot;lossM&quot;: 1100,
+          &quot;duration&quot;: &quot;5:30&quot;,
+          &quot;grade&quot;: { &quot;hiking&quot;: &quot;T3&quot; },
+          &quot;peaks&quot;: [{ &quot;name&quot;: &quot;Pizol&quot;, &quot;lat&quot;: 46.9586, &quot;lon&quot;: 9.3897, &quot;elevationM&quot;: 2844 }],
+          &quot;places&quot;: [{ &quot;name&quot;: &quot;Wangs&quot; }]
+        }
+      ]
+    },
+    {
+      &quot;date&quot;: &quot;2024-07-20&quot;,
+      &quot;name&quot;: &quot;Weissmies&quot;,
+      &quot;region&quot;: { &quot;country&quot;: &quot;Schweiz&quot;, &quot;countryCode&quot;: &quot;CH&quot;, &quot;state&quot;: &quot;Wallis&quot;, &quot;stateCode&quot;: &quot;CH-VS&quot;, &quot;group&quot;: &quot;Saastal&quot; },
+      &quot;collection&quot;: &quot;Hochtourenwoche 2024&quot;,
+      &quot;partners&quot;: [&quot;Beat&quot;],
+      &quot;segments&quot;: [
+        {
+          &quot;sport&quot;: &quot;alpine&quot;,
+          &quot;gainM&quot;: 1350,
+          &quot;lossM&quot;: 1350,
+          &quot;duration&quot;: &quot;7:15&quot;,
+          &quot;places&quot;: [{ &quot;name&quot;: &quot;Hohsaas&quot; }],
+          &quot;routes&quot;: [{ &quot;name&quot;: &quot;Normal route&quot;, &quot;peak&quot;: &quot;Weissmies&quot;, &quot;grades&quot;: { &quot;alpine&quot;: &quot;WS&quot; }, &quot;outcome&quot;: &quot;reached&quot; }]
+        }
+      ]
+    },
+    {
+      &quot;date&quot;: &quot;2024-07-21&quot;,
+      &quot;name&quot;: &quot;Lagginhorn&quot;,
+      &quot;region&quot;: { &quot;country&quot;: &quot;Schweiz&quot;, &quot;countryCode&quot;: &quot;CH&quot;, &quot;state&quot;: &quot;Wallis&quot;, &quot;stateCode&quot;: &quot;CH-VS&quot;, &quot;group&quot;: &quot;Saastal&quot; },
+      &quot;collection&quot;: &quot;Hochtourenwoche 2024&quot;,
+      &quot;segments&quot;: [
+        {
+          &quot;sport&quot;: &quot;alpine&quot;,
+          &quot;peaks&quot;: [{ &quot;name&quot;: &quot;Lagginhorn&quot;, &quot;outcome&quot;: &quot;turned_back&quot; }],
+          &quot;routes&quot;: [{ &quot;name&quot;: &quot;West ridge&quot;, &quot;peak&quot;: &quot;Lagginhorn&quot;, &quot;grades&quot;: { &quot;alpine&quot;: &quot;WS+&quot;, &quot;uiaa&quot;: &quot;III&quot; } }]
+        }
+      ]
+    },
+    {
+      &quot;date&quot;: &quot;2024-09-14&quot;,
+      &quot;name&quot;: &quot;Wendenstöcke&quot;,
+      &quot;segments&quot;: [
+        { &quot;sport&quot;: &quot;hiking&quot;, &quot;name&quot;: &quot;Approach&quot;, &quot;gainM&quot;: 450, &quot;duration&quot;: &quot;1:15&quot; },
+        {
+          &quot;sport&quot;: &quot;climbing&quot;,
+          &quot;routes&quot;: [
+            {
+              &quot;name&quot;: &quot;Motörhead&quot;,
+              &quot;area&quot;: &quot;Gadmen&quot;,
+              &quot;sector&quot;: &quot;Wendenstöcke&quot;,
+              &quot;style&quot;: &quot;redpoint&quot;,
+              &quot;role&quot;: &quot;lead&quot;,
+              &quot;pitches&quot;: [
+                { &quot;grades&quot;: { &quot;french&quot;: &quot;6a&quot; }, &quot;lengthM&quot;: 35 },
+                { &quot;grades&quot;: { &quot;french&quot;: &quot;6b+&quot; }, &quot;lengthM&quot;: 30, &quot;role&quot;: &quot;follow&quot; },
+                { &quot;grades&quot;: { &quot;french&quot;: &quot;6a+&quot; }, &quot;lengthM&quot;: 40 }
+              ]
+            },
+            { &quot;name&quot;: &quot;Warm-up&quot;, &quot;area&quot;: &quot;Gadmen&quot;, &quot;sector&quot;: &quot;Wendenstöcke&quot;, &quot;grades&quot;: { &quot;uiaa&quot;: &quot;V+&quot; }, &quot;style&quot;: &quot;onsight&quot; }
+          ]
+        }
+      ]
+    },
+    {
+      &quot;date&quot;: &quot;2024-10-05&quot;,
+      &quot;name&quot;: &quot;Chironico&quot;,
+      &quot;partners&quot;: [&quot;Carla&quot;],
+      &quot;segments&quot;: [
+        {
+          &quot;sport&quot;: &quot;bouldering&quot;,
+          &quot;routes&quot;: [
+            { &quot;name&quot;: &quot;Dreamtime&quot;, &quot;sector&quot;: &quot;Chironico Sinistra&quot;, &quot;boulder&quot;: &quot;Dreamtime block&quot;, &quot;grades&quot;: { &quot;font&quot;: &quot;8B+&quot; }, &quot;style&quot;: &quot;attempt&quot;, &quot;attempts&quot;: 12 },
+            { &quot;name&quot;: &quot;Ganesh&quot;, &quot;sector&quot;: &quot;Chironico Sinistra&quot;, &quot;boulder&quot;: &quot;Ganesh block&quot;, &quot;grades&quot;: { &quot;font&quot;: &quot;7C&quot; }, &quot;style&quot;: &quot;flash&quot; }
+          ]
+        }
+      ]
+    },
+    {
+      &quot;date&quot;: &quot;2025-02-08&quot;,
+      &quot;name&quot;: &quot;Niesen hike &amp; fly&quot;,
+      &quot;segments&quot;: [
+        { &quot;sport&quot;: &quot;snowshoeing&quot;, &quot;gainM&quot;: 1600, &quot;duration&quot;: &quot;4:10&quot;, &quot;grade&quot;: { &quot;snowshoe&quot;: &quot;WT2&quot; }, &quot;peaks&quot;: [{ &quot;name&quot;: &quot;Niesen&quot;, &quot;elevationM&quot;: 2362 }] },
+        { &quot;sport&quot;: &quot;paragliding&quot;, &quot;name&quot;: &quot;Flight down&quot;, &quot;lossM&quot;: 1650, &quot;duration&quot;: &quot;0:25&quot; }
+      ]
+    }
+  ]
+}</code></pre>
+<h2>Capturing a sector topo</h2>
+<p>A climbing guide, a topo page (theCrag, a club's website), a PDF or a photo
+of the board at the crag lists a sector's routes: a number, a name, a grade,
+a length, a line of text. An AI given this page and that listing writes a
+file of <strong>topos</strong> — the area, the sector and its routes, with no tour — and
+the app adds them to the logbook as places and routes you have not climbed
+yet. Your later tours find them by name.</p>
+<p>There are two ways in:</p>
+<ul><li><strong>Settings › Tools › Tour list import</strong> takes a file of <code>topos</code> (alone or beside <code>tours</code>). Every topo names its <code>area</code> and its <code>sector</code>.</li><li><strong>On a sector's screen, ⋮ › Import routes (JSON)</strong> takes the routes into *that* sector. The file may leave out area and sector — a topo with only <code>routes</code>, or simply a top-level <code>routes</code> list (second example below); if it names a sector or area, it must be this one (case and spacing ignored), or the file is refused rather than filed elsewhere. <strong>On an area's screen</strong> the same action takes topos that name their <code>sector</code>: a sector of that name inside the area is used, else created with its discipline.</li></ul>
+<p><strong>Existing routes are never overwritten.</strong> A route that the sector already
+holds — same sport, same name (case and spacing ignored) — keeps its grades,
+length, pitches and character exactly as they are, and is reported as
+already present; only a topo number or note it does not have yet is added.
+Only new routes are created. Importing the same file again therefore adds
+nothing. A name spelled differently from the logbook's (&quot;Bazilus&quot; beside
+&quot;Bazillus&quot;) becomes a second route: join the two afterwards with the route
+merge — on the sector's screen, the route's ⋯ › <strong>Merge with another route…</strong>,
+or <strong>Settings › Tools › Data quality › Duplicate routes</strong>, which finds such
+pairs. The visits move to the route you keep, and its topo takes what it
+lacked.</p>
+<p>One topo is one transaction: a sector comes in whole or not at all, and the
+report lists per sector whether area and sector were new, how many routes were
+created and how many were already there.</p>
+<p>Mapping a topo listing:</p>
+<div class="table"><table>
+<thead><tr><th>On the topo</th><th>Field</th></tr></thead>
+<tbody><tr><td>The number in front of the route (<code>0</code>, <code>1</code>, <code>12</code>)</td><td><code>topoIndex</code></td></tr><tr><td>The route's name</td><td><code>name</code></td></tr><tr><td>The grade (<code>7b</code>, <code>6a+</code>, <code>VI+</code>, <code>7A</code>)</td><td><code>grades</code> with its scale: French <code>7b</code> → <code>{ &quot;french&quot;: &quot;7b&quot; }</code>, UIAA <code>VI+</code> → <code>{ &quot;uiaa&quot;: &quot;VI+&quot; }</code>, a boulder grade <code>7A</code> → <code>{ &quot;font&quot;: &quot;7A&quot; }</code></td></tr><tr><td>The length (<code>15m</code>, <code>25 m</code>)</td><td><code>lengthM</code> as a number: <code>15</code></td></tr><tr><td>Pitches (<code>3 SL</code>, a grade per pitch)</td><td><code>pitches</code>, one entry per pitch with its grade and length; with only the route's grade (<code>5c, 2 SL</code>), the grade in the route's <code>grades</code> and one empty entry <code>{}</code> per pitch</td></tr><tr><td>&quot;Sport&quot;, &quot;bolted&quot;</td><td>nothing — sport climbing on bolts is the default (<code>character</code> <code>plaisir</code>); &quot;trad&quot; → <code>trad</code>, &quot;partly bolted&quot; → <code>partly_bolted</code></td></tr><tr><td>A description, &quot;Extension of …&quot;, &quot;Erstbegehung: …&quot;, the first ascent</td><td><code>note</code>, as written</td></tr><tr><td>Stars, a quality rating, ascent counts, a photo</td><td>nothing — not stored; leave them out</td></tr></tbody>
+</table></div>
+<p>Write each name exactly as the topo spells it, and keep the topo's own grade
+scale. Leave out what the listing does not say; never fill a grade or a
+length from elsewhere.</p>
+<p>A topo for the tour list import:</p>
+<pre><code>{
+  &quot;format&quot;: &quot;tourbook-import&quot;,
+  &quot;version&quot;: 1,
+  &quot;topos&quot;: [
+    {
+      &quot;area&quot;: { &quot;name&quot;: &quot;Balmfluh&quot;, &quot;region&quot;: { &quot;country&quot;: &quot;Schweiz&quot;, &quot;countryCode&quot;: &quot;CH&quot;, &quot;state&quot;: &quot;Solothurn&quot;, &quot;stateCode&quot;: &quot;CH-SO&quot; } },
+      &quot;sector&quot;: { &quot;name&quot;: &quot;Hauptwand&quot;, &quot;discipline&quot;: &quot;rope&quot; },
+      &quot;routes&quot;: [
+        { &quot;topoIndex&quot;: 1, &quot;name&quot;: &quot;Bazillus&quot;, &quot;grades&quot;: { &quot;french&quot;: &quot;7b&quot; }, &quot;lengthM&quot;: 12 },
+        { &quot;topoIndex&quot;: 2, &quot;name&quot;: &quot;3 Tiger &amp; 1 Baby&quot;, &quot;grades&quot;: { &quot;french&quot;: &quot;7c+&quot; }, &quot;lengthM&quot;: 15, &quot;note&quot;: &quot;Extension of Bazillus.&quot; },
+        {
+          &quot;topoIndex&quot;: 3,
+          &quot;name&quot;: &quot;Pipopa&quot;,
+          &quot;grades&quot;: { &quot;french&quot;: &quot;8b&quot; },
+          &quot;note&quot;: &quot;rechte Verlängerung zu 'Himmel und Hölle'. Erstbegehung: Stefan Schibli&quot;
+        },
+        {
+          &quot;topoIndex&quot;: 4,
+          &quot;name&quot;: &quot;Lange Reise&quot;,
+          &quot;pitches&quot;: [
+            { &quot;grades&quot;: { &quot;french&quot;: &quot;6a&quot; }, &quot;lengthM&quot;: 30 },
+            { &quot;grades&quot;: { &quot;french&quot;: &quot;6b+&quot; }, &quot;lengthM&quot;: 25 }
+          ]
+        }
+      ]
+    },
+    {
+      &quot;area&quot;: { &quot;name&quot;: &quot;Balmfluh&quot;, &quot;region&quot;: { &quot;country&quot;: &quot;Schweiz&quot;, &quot;countryCode&quot;: &quot;CH&quot;, &quot;state&quot;: &quot;Solothurn&quot;, &quot;stateCode&quot;: &quot;CH-SO&quot; } },
+      &quot;sector&quot;: { &quot;name&quot;: &quot;Blockfeld&quot;, &quot;discipline&quot;: &quot;boulder&quot; },
+      &quot;boulders&quot;: [
+        { &quot;name&quot;: &quot;Ei&quot;, &quot;routes&quot;: [{ &quot;topoIndex&quot;: 1, &quot;name&quot;: &quot;Dotter&quot;, &quot;grades&quot;: { &quot;font&quot;: &quot;6A&quot; } }] }
+      ]
+    }
+  ]
+}</code></pre>
+<p>The same routes on the screen of sector &quot;Hauptwand&quot; — no area, no sector:</p>
+<pre><code>{
+  &quot;format&quot;: &quot;tourbook-import&quot;,
+  &quot;version&quot;: 1,
+  &quot;routes&quot;: [
+    { &quot;topoIndex&quot;: 1, &quot;name&quot;: &quot;Bazillus&quot;, &quot;grades&quot;: { &quot;french&quot;: &quot;7b&quot; }, &quot;lengthM&quot;: 12 },
+    { &quot;topoIndex&quot;: 5, &quot;name&quot;: &quot;Vitalstoffe&quot;, &quot;grades&quot;: { &quot;french&quot;: &quot;7a&quot; }, &quot;lengthM&quot;: 15 }
+  ]
+}</code></pre>
+<h2>JSON Schema</h2>
+<p>The shape of the file as a <a href="https://json-schema.org">JSON Schema</a> (draft
+2020-12). It checks the structure and the vocabularies; which fields each
+sport records, and which tokens a scale has, the app checks as described
+above.</p>
+<pre><code>{
+  &quot;$schema&quot;: &quot;https://json-schema.org/draft/2020-12/schema&quot;,
+  &quot;title&quot;: &quot;TourBook tour list, version 1&quot;,
+  &quot;description&quot;: &quot;The shape of a *.tourbook.json file. Which fields a sport records, and which grade tokens a scale accepts, is checked by the app and described in the guide.&quot;,
+  &quot;type&quot;: &quot;object&quot;,
+  &quot;properties&quot;: {
+    &quot;format&quot;: { &quot;const&quot;: &quot;tourbook-import&quot; },
+    &quot;version&quot;: { &quot;const&quot;: 1 },
+    &quot;tours&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/tour&quot; } },
+    &quot;topos&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/topo&quot; } },
+    &quot;routes&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/topoRoute&quot; } },
+    &quot;$schema&quot;: { &quot;type&quot;: &quot;string&quot; }
+  },
+  &quot;required&quot;: [&quot;format&quot;, &quot;version&quot;],
+  &quot;anyOf&quot;: [
+    { &quot;required&quot;: [&quot;tours&quot;], &quot;properties&quot;: { &quot;tours&quot;: { &quot;type&quot;: &quot;array&quot; } } },
+    { &quot;required&quot;: [&quot;topos&quot;], &quot;properties&quot;: { &quot;topos&quot;: { &quot;type&quot;: &quot;array&quot; } } },
+    { &quot;required&quot;: [&quot;routes&quot;], &quot;properties&quot;: { &quot;routes&quot;: { &quot;type&quot;: &quot;array&quot; } } }
+  ],
+  &quot;additionalProperties&quot;: false,
+  &quot;$defs&quot;: {
+    &quot;text&quot;: { &quot;type&quot;: &quot;string&quot;, &quot;pattern&quot;: &quot;\\S&quot; },
+    &quot;optionalText&quot;: { &quot;type&quot;: [&quot;string&quot;, &quot;null&quot;] },
+    &quot;elevation&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: -500, &quot;maximum&quot;: 9000 },
+    &quot;pitchLength&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: 0, &quot;maximum&quot;: 500 },
+    &quot;names&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/text&quot; } },
+    &quot;grades&quot;: {
+      &quot;description&quot;: &quot;A grade per scale: { \&quot;french\&quot;: \&quot;6a\&quot; }. One scale per family (french, uiaa, yds and norwegian are one family).&quot;,
+      &quot;type&quot;: [&quot;object&quot;, &quot;null&quot;],
+      &quot;propertyNames&quot;: {
+        &quot;enum&quot;: [&quot;french&quot;, &quot;uiaa&quot;, &quot;yds&quot;, &quot;norwegian&quot;, &quot;font&quot;, &quot;vscale&quot;, &quot;ice&quot;, &quot;alpine&quot;, &quot;mixed&quot;, &quot;hiking&quot;, &quot;mtb&quot;, &quot;via_ferrata&quot;, &quot;snowshoe&quot;]
+      },
+      &quot;additionalProperties&quot;: { &quot;type&quot;: &quot;string&quot; }
+    },
+    &quot;tour&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;date&quot;: { &quot;type&quot;: &quot;string&quot;, &quot;pattern&quot;: &quot;^\\d{4}-\\d{2}-\\d{2}$&quot; },
+        &quot;name&quot;: { &quot;$ref&quot;: &quot;#/$defs/text&quot; },
+        &quot;description&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; },
+        &quot;region&quot;: { &quot;$ref&quot;: &quot;#/$defs/region&quot; },
+        &quot;collection&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; },
+        &quot;partners&quot;: { &quot;$ref&quot;: &quot;#/$defs/names&quot; },
+        &quot;tags&quot;: { &quot;$ref&quot;: &quot;#/$defs/names&quot; },
+        &quot;segments&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;minItems&quot;: 1, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/segment&quot; } }
+      },
+      &quot;required&quot;: [&quot;date&quot;, &quot;name&quot;, &quot;segments&quot;],
+      &quot;additionalProperties&quot;: false
+    },
+    &quot;region&quot;: {
+      &quot;type&quot;: [&quot;object&quot;, &quot;null&quot;],
+      &quot;properties&quot;: {
+        &quot;country&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; },
+        &quot;countryCode&quot;: { &quot;type&quot;: [&quot;string&quot;, &quot;null&quot;], &quot;pattern&quot;: &quot;^[A-Z]{2}$&quot; },
+        &quot;state&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; },
+        &quot;stateCode&quot;: { &quot;type&quot;: [&quot;string&quot;, &quot;null&quot;], &quot;pattern&quot;: &quot;^[A-Z]{2}-[A-Z0-9]{1,3}$&quot; },
+        &quot;group&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; }
+      },
+      &quot;minProperties&quot;: 1,
+      &quot;additionalProperties&quot;: false
+    },
+    &quot;segment&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;sport&quot;: {
+          &quot;enum&quot;: [
+            &quot;hiking&quot;,
+            &quot;scrambling&quot;,
+            &quot;alpine&quot;,
+            &quot;climbing&quot;,
+            &quot;ski_touring&quot;,
+            &quot;xc_skiing&quot;,
+            &quot;running&quot;,
+            &quot;orienteering&quot;,
+            &quot;mtb&quot;,
+            &quot;road_cycling&quot;,
+            &quot;trail_running&quot;,
+            &quot;ice_climbing&quot;,
+            &quot;mixed_climbing&quot;,
+            &quot;paragliding&quot;,
+            &quot;bouldering&quot;,
+            &quot;ski_mountaineering&quot;,
+            &quot;via_ferrata&quot;,
+            &quot;snowshoeing&quot;
+          ]
+        },
+        &quot;name&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; },
+        &quot;distanceKm&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: 0, &quot;maximum&quot;: 1000 },
+        &quot;gainM&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: 0, &quot;maximum&quot;: 15000 },
+        &quot;lossM&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: 0, &quot;maximum&quot;: 15000 },
+        &quot;duration&quot;: { &quot;type&quot;: [&quot;string&quot;, &quot;null&quot;], &quot;pattern&quot;: &quot;^\\d+:[0-5]\\d(:[0-5]\\d)?$&quot; },
+        &quot;grade&quot;: { &quot;$ref&quot;: &quot;#/$defs/grades&quot; },
+        &quot;peaks&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/peak&quot; } },
+        &quot;places&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/place&quot; } },
+        &quot;routes&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/route&quot; } }
+      },
+      &quot;required&quot;: [&quot;sport&quot;],
+      &quot;additionalProperties&quot;: false
+    },
+    &quot;peak&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;name&quot;: { &quot;$ref&quot;: &quot;#/$defs/text&quot; },
+        &quot;lat&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: -90, &quot;maximum&quot;: 90 },
+        &quot;lon&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: -180, &quot;maximum&quot;: 180 },
+        &quot;elevationM&quot;: { &quot;$ref&quot;: &quot;#/$defs/elevation&quot; },
+        &quot;outcome&quot;: { &quot;enum&quot;: [&quot;reached&quot;, &quot;turned_back&quot;, null] }
+      },
+      &quot;required&quot;: [&quot;name&quot;],
+      &quot;additionalProperties&quot;: false
+    },
+    &quot;place&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;name&quot;: { &quot;$ref&quot;: &quot;#/$defs/text&quot; },
+        &quot;lat&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: -90, &quot;maximum&quot;: 90 },
+        &quot;lon&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: -180, &quot;maximum&quot;: 180 },
+        &quot;elevationM&quot;: { &quot;$ref&quot;: &quot;#/$defs/elevation&quot; }
+      },
+      &quot;required&quot;: [&quot;name&quot;],
+      &quot;additionalProperties&quot;: false
+    },
+    &quot;route&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;name&quot;: { &quot;$ref&quot;: &quot;#/$defs/text&quot; },
+        &quot;peak&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; },
+        &quot;place&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; },
+        &quot;area&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; },
+        &quot;sector&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; },
+        &quot;boulder&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; },
+        &quot;grades&quot;: { &quot;$ref&quot;: &quot;#/$defs/grades&quot; },
+        &quot;pitches&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/pitch&quot; } },
+        &quot;style&quot;: { &quot;enum&quot;: [&quot;onsight&quot;, &quot;flash&quot;, &quot;redpoint&quot;, &quot;repeat&quot;, &quot;french_free&quot;, &quot;aid&quot;, &quot;attempt&quot;, null] },
+        &quot;role&quot;: { &quot;enum&quot;: [&quot;lead&quot;, &quot;follow&quot;, &quot;alternating&quot;, null] },
+        &quot;attempts&quot;: { &quot;type&quot;: [&quot;integer&quot;, &quot;null&quot;], &quot;minimum&quot;: 1, &quot;maximum&quot;: 999 },
+        &quot;outcome&quot;: { &quot;enum&quot;: [&quot;reached&quot;, &quot;turned_back&quot;, null] }
+      },
+      &quot;required&quot;: [&quot;name&quot;],
+      &quot;additionalProperties&quot;: false
+    },
+    &quot;pitch&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;grades&quot;: { &quot;$ref&quot;: &quot;#/$defs/grades&quot; },
+        &quot;lengthM&quot;: { &quot;$ref&quot;: &quot;#/$defs/pitchLength&quot; },
+        &quot;role&quot;: { &quot;enum&quot;: [&quot;lead&quot;, &quot;follow&quot;, &quot;alternating&quot;, null] },
+        &quot;style&quot;: { &quot;enum&quot;: [&quot;onsight&quot;, &quot;flash&quot;, &quot;redpoint&quot;, &quot;repeat&quot;, &quot;french_free&quot;, &quot;aid&quot;, &quot;attempt&quot;, null] }
+      },
+      &quot;additionalProperties&quot;: false
+    },
+    &quot;topo&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;area&quot;: { &quot;$ref&quot;: &quot;#/$defs/topoArea&quot; },
+        &quot;sector&quot;: { &quot;$ref&quot;: &quot;#/$defs/topoSector&quot; },
+        &quot;routes&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/topoRoute&quot; } },
+        &quot;boulders&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/topoBoulder&quot; } }
+      },
+      &quot;additionalProperties&quot;: false
+    },
+    &quot;topoArea&quot;: {
+      &quot;type&quot;: [&quot;object&quot;, &quot;null&quot;],
+      &quot;properties&quot;: {
+        &quot;name&quot;: { &quot;$ref&quot;: &quot;#/$defs/text&quot; },
+        &quot;lat&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: -90, &quot;maximum&quot;: 90 },
+        &quot;lon&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: -180, &quot;maximum&quot;: 180 },
+        &quot;elevationM&quot;: { &quot;$ref&quot;: &quot;#/$defs/elevation&quot; },
+        &quot;region&quot;: { &quot;$ref&quot;: &quot;#/$defs/region&quot; }
+      },
+      &quot;required&quot;: [&quot;name&quot;],
+      &quot;additionalProperties&quot;: false
+    },
+    &quot;topoSector&quot;: {
+      &quot;type&quot;: [&quot;object&quot;, &quot;null&quot;],
+      &quot;properties&quot;: {
+        &quot;name&quot;: { &quot;$ref&quot;: &quot;#/$defs/text&quot; },
+        &quot;discipline&quot;: { &quot;enum&quot;: [&quot;rope&quot;, &quot;boulder&quot;, null] },
+        &quot;lat&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: -90, &quot;maximum&quot;: 90 },
+        &quot;lon&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: -180, &quot;maximum&quot;: 180 },
+        &quot;elevationM&quot;: { &quot;$ref&quot;: &quot;#/$defs/elevation&quot; }
+      },
+      &quot;required&quot;: [&quot;name&quot;],
+      &quot;additionalProperties&quot;: false
+    },
+    &quot;topoBoulder&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;name&quot;: { &quot;$ref&quot;: &quot;#/$defs/text&quot; },
+        &quot;lat&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: -90, &quot;maximum&quot;: 90 },
+        &quot;lon&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: -180, &quot;maximum&quot;: 180 },
+        &quot;elevationM&quot;: { &quot;$ref&quot;: &quot;#/$defs/elevation&quot; },
+        &quot;routes&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;minItems&quot;: 1, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/topoRoute&quot; } }
+      },
+      &quot;required&quot;: [&quot;name&quot;, &quot;routes&quot;],
+      &quot;additionalProperties&quot;: false
+    },
+    &quot;topoRoute&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;topoIndex&quot;: { &quot;type&quot;: [&quot;integer&quot;, &quot;null&quot;], &quot;minimum&quot;: 0, &quot;maximum&quot;: 9999 },
+        &quot;name&quot;: { &quot;$ref&quot;: &quot;#/$defs/text&quot; },
+        &quot;sport&quot;: { &quot;enum&quot;: [&quot;climbing&quot;, &quot;ice_climbing&quot;, &quot;mixed_climbing&quot;, &quot;bouldering&quot;, null] },
+        &quot;grades&quot;: { &quot;$ref&quot;: &quot;#/$defs/grades&quot; },
+        &quot;lengthM&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: 0, &quot;maximum&quot;: 3000 },
+        &quot;pitches&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/topoPitch&quot; } },
+        &quot;character&quot;: { &quot;enum&quot;: [&quot;plaisir&quot;, &quot;partly_bolted&quot;, &quot;trad&quot;, &quot;alpine&quot;, null] },
+        &quot;note&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; }
+      },
+      &quot;required&quot;: [&quot;name&quot;],
+      &quot;additionalProperties&quot;: false
+    },
+    &quot;topoPitch&quot;: {
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;grades&quot;: { &quot;$ref&quot;: &quot;#/$defs/grades&quot; },
+        &quot;lengthM&quot;: { &quot;$ref&quot;: &quot;#/$defs/pitchLength&quot; }
+      },
+      &quot;additionalProperties&quot;: false
+    }
+  }
+}</code></pre>
+</main>
+<footer><a href="../">Home</a> · <a href="../privacy/">Privacy policy</a> · <a href="../archive-format/">Archive format</a> · <a href="../import-format/">Tour list import</a></footer>
+</body>
+</html>

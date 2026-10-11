@@ -63,13 +63,24 @@ belongs to exactly one row.</p>
 <p>A JSON object with these fields:</p>
 <div class="table"><table>
 <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
-<tbody><tr><td><code>formatVersion</code></td><td><code>2</code> for this format.</td></tr><tr><td><code>source</code></td><td><code>app</code>: written by the TourBook app.</td></tr><tr><td><code>appVersion</code></td><td>The app version that wrote the archive.</td></tr><tr><td><code>schemaVersion</code></td><td>The database's schema version, explained under Versions below.</td></tr><tr><td><code>createdAt</code></td><td>When the archive was written, ISO 8601 in UTC.</td></tr><tr><td><code>contents</code></td><td><code>full</code>: the complete logbook of one installation, for a restore. <code>filtered</code>: selected tours, for importing into another logbook. Archives written before this field existed are <code>full</code>.</td></tr><tr><td><code>databaseId</code></td><td>An identifier of the logbook, the same in all its full backups. Absent in a filtered export.</td></tr><tr><td><code>counts</code></td><td>Rows per table in the archived database: <code>{ &quot;tour&quot;: 429, … }</code>.</td></tr><tr><td><code>entries</code></td><td>Every file of the archive except the manifest itself: <code>{ &quot;path&quot;, &quot;bytes&quot;, &quot;sha256&quot; }</code>, with the uncompressed size and the SHA-256 of the uncompressed content as lowercase hex.</td></tr><tr><td><code>totalBytes</code></td><td>The sum of all <code>entries[].bytes</code>.</td></tr></tbody>
+<tbody><tr><td><code>formatVersion</code></td><td><code>2</code> for this format.</td></tr><tr><td><code>source</code></td><td><code>app</code>: written by the TourBook app.</td></tr><tr><td><code>appVersion</code></td><td>The app version that wrote the archive.</td></tr><tr><td><code>schemaVersion</code></td><td>The database's schema version, explained under Versions below.</td></tr><tr><td><code>createdAt</code></td><td>When the archive was written, ISO 8601 in UTC.</td></tr><tr><td><code>contents</code></td><td><code>full</code>: the complete logbook of one installation, for a restore. <code>filtered</code>: selected tours, for importing into another logbook. Archives written before this field existed are <code>full</code>.</td></tr><tr><td><code>databaseId</code></td><td>An identifier of the logbook, the same in all its full backups. Absent in a filtered export.</td></tr><tr><td><code>gradeAxisVersion</code></td><td>The version of the grade axis the database's grade levels are on, explained under Versions below. Archives written before this field existed are on version <code>1</code>.</td></tr><tr><td><code>counts</code></td><td>Rows per table in the archived database: <code>{ &quot;tour&quot;: 429, … }</code>.</td></tr><tr><td><code>entries</code></td><td>Every file of the archive except the manifest itself: <code>{ &quot;path&quot;, &quot;bytes&quot;, &quot;sha256&quot; }</code>, with the uncompressed size and the SHA-256 of the uncompressed content as lowercase hex.</td></tr><tr><td><code>totalBytes</code></td><td>The sum of all <code>entries[].bytes</code>.</td></tr></tbody>
 </table></div>
-<p><code>counts</code> covers these tables: <code>person</code>, <code>region</code>, <code>tag</code>, <code>collection</code>,
-<code>location</code>, <code>location_attribute</code>, <code>route</code>, <code>route_pitch</code>, <code>route_grade</code>,
-<code>route_pitch_grade</code>, <code>tour</code>, <code>tour_segment</code>, <code>tour_person</code>, <code>tour_tag</code>,
-<code>tour_location</code>, <code>segment_grade</code>, <code>ascent</code>, <code>ascent_pitch</code>, <code>media</code>,
-<code>gpx_track</code>, <code>gpx_waypoint</code>. Tours in the trash are counted too.</p>
+<p><code>counts</code> covers these tables: <code>tour</code>, <code>tour_segment</code>, <code>tour_person</code>,
+<code>tour_tag</code>, <code>tour_location</code>, <code>segment_grade</code>, <code>segment_condition</code>,
+<code>ascent</code>, <code>ascent_pitch</code>, <code>media</code>, <code>gpx_track</code>, <code>gpx_waypoint</code>,
+<code>person</code>, <code>tag</code>, <code>collection</code>, <code>region</code>, <code>location</code>,
+<code>location_attribute</code>, <code>location_grade_scale</code>, <code>route</code>, <code>route_pitch</code>,
+<code>route_grade</code>, <code>route_pitch_grade</code>, <code>segment_attribute</code>,
+<code>segment_attribute_value</code>, <code>segment_attribute_sport</code>,
+<code>segment_attribute_choice</code>, <code>attribute</code>, <code>challenge</code>,
+<code>challenge_target</code>, <code>challenge_target_alias</code>, <code>app_setting</code>,
+<code>tour_review</code>, <code>location_review</code>, <code>route_review</code>, <code>ascent_review</code>,
+<code>tour_pair_review</code>, <code>location_pair_review</code>, <code>route_pair_review</code>,
+<code>region_group</code>, <code>region_group_region</code>, <code>region_group_location</code>,
+<code>region_group_tour</code>, <code>tour_gpx_metrics</code>, <code>segment_gpx_metrics</code>,
+<code>location_region</code>, <code>segment_region</code>, <code>location_region_check</code>,
+<code>segment_region_check</code>. Tours in the trash are counted too. An archive
+written by an earlier version may count fewer of them.</p>
 <p>To check an archive by hand: unzip it and compare <code>sha256sum</code> of each file
 with its entry.</p>
 <h2>The database</h2>
@@ -78,24 +89,55 @@ schema is the reference: <code>sqlite3 tourbook.db .schema</code> lists every ta
 column and rule with comments. The tables that hold your logbook:</p>
 <div class="table"><table>
 <thead><tr><th>Table</th><th>What a row is</th></tr></thead>
-<tbody><tr><td><code>tour</code></td><td>One outing: date (<code>date_from</code>, <code>YYYY-MM-DD</code>), name, description, region, collection. <code>deleted_at</code> is set while the tour is in the trash.</td></tr><tr><td><code>tour_segment</code></td><td>One sport within a tour, in order (<code>sort_index</code>): the sport, the typed distance, height gain and loss, duration, and a race result where there was one.</td></tr><tr><td><code>tour_person</code>, <code>tour_tag</code></td><td>The partners and tags of a tour (<code>person</code>, <code>tag</code>).</td></tr><tr><td><code>tour_location</code></td><td>The peaks and places of a tour. <code>role</code> is <code>summit</code> (reached), <code>attempt</code> (turned back) or <code>visited</code>.</td></tr><tr><td><code>location</code></td><td>A peak, place, climbing area, sector or boulder, with position and height. <code>parent_id</code> builds the tree: area, then sector, then boulder.</td></tr><tr><td><code>route</code>, <code>route_pitch</code>, <code>route_grade</code>, <code>route_pitch_grade</code></td><td>A route at a location with its pitches and grades. A route belongs to its location, not to a tour.</td></tr><tr><td><code>ascent</code>, <code>ascent_pitch</code></td><td>One visit of a route on a tour segment: style, role (<code>lead</code>, <code>follow</code>, <code>alternating</code>), number of goes, the pitches climbed.</td></tr><tr><td><code>segment_grade</code></td><td>The difficulty of a segment per grading scale, typed or derived from its ascents.</td></tr><tr><td><code>gpx_track</code>, <code>gpx_waypoint</code></td><td>A recorded track of a segment (its file is the <code>.tbg</code>) and its waypoints.</td></tr><tr><td><code>tour_gpx_metrics</code>, <code>segment_gpx_metrics</code></td><td>Figures computed from the tracks: distance, gains, times, paces, speeds.</td></tr><tr><td><code>media</code></td><td>A photo or file of a tour or of a location.</td></tr><tr><td><code>collection</code></td><td>A named group of tours, with an optional planned span.</td></tr><tr><td><code>region</code></td><td>A region tree (country, canton, …).</td></tr><tr><td><code>segment_condition</code>, <code>segment_attribute*</code></td><td>Conditions such as snow or avalanche level, and the attributes you defined yourself.</td></tr></tbody>
+<tbody><tr><td><code>tour</code></td><td>One outing: date (<code>date_from</code>, <code>YYYY-MM-DD</code>), name, description, region, collection. <code>year</code> is computed from <code>date_from</code> by SQLite (a generated column: <code>sqlite3</code> lists it with <code>PRAGMA table_xinfo</code>, not <code>table_info</code>). <code>deleted_at</code> is set while the tour is in the trash.</td></tr><tr><td><code>tour_segment</code></td><td>One sport within a tour, in order (<code>sort_index</code>): the sport, the typed distance, height gain and loss, duration, and a race result where there was one.</td></tr><tr><td><code>tour_person</code>, <code>tour_tag</code></td><td>The partners and tags of a tour (<code>person</code>, <code>tag</code>).</td></tr><tr><td><code>tour_location</code></td><td>The peaks and places of a tour. <code>role</code> is <code>summit</code> (reached), <code>attempt</code> (turned back) or <code>visited</code>.</td></tr><tr><td><code>location</code></td><td>A peak, place, climbing area, sector or boulder, with position and height. <code>parent_id</code> builds the tree: area, then sector, then boulder.</td></tr><tr><td><code>route</code>, <code>route_pitch</code>, <code>route_grade</code>, <code>route_pitch_grade</code></td><td>A route at a location with its pitches (numbered from 1, <code>idx</code>) and grades, its number on the topo (<code>topo_index</code>) and the topo's text (<code>note</code> — for a route imported from TourBook 1 also its inclination). A route belongs to its location, not to a tour.</td></tr><tr><td><code>ascent</code>, <code>ascent_pitch</code></td><td>One visit of a route on a tour segment. A climbing visit carries style, role (<code>lead</code>, <code>follow</code>, <code>alternating</code>), number of goes and the pitches climbed (<code>route_pitch_id</code> names the topo pitch; a topo pitch some visit climbed cannot be deleted); a mountaineering, ski touring or hiking visit carries <code>outcome</code> (<code>reached</code>, <code>turned_back</code>) and, on mountaineering, the pitches recorded with their own role and style.</td></tr><tr><td><code>segment_grade</code></td><td>The difficulty of a segment per grading scale, typed or derived from its ascents.</td></tr><tr><td><code>gpx_track</code>, <code>gpx_waypoint</code></td><td>A recorded track of a segment (its file is the <code>.tbg</code>) and its waypoints.</td></tr><tr><td><code>tour_gpx_metrics</code>, <code>segment_gpx_metrics</code></td><td>Figures computed from the tracks: distance, gains, times, paces, speeds.</td></tr><tr><td><code>media</code></td><td>A photo or file of a tour or of a location.</td></tr><tr><td><code>collection</code></td><td>A named group of tours, with an optional planned span.</td></tr><tr><td><code>region</code></td><td>The administrative regions: countries and their cantons or states. <code>code</code> is the region's ISO 3166 code where known (ISO 3166-1 alpha-2 on a country, ISO 3166-2 on a state, unique) — what identifies it across devices; <code>name</code> is its label.</td></tr><tr><td><code>location_region</code>, <code>segment_region</code></td><td>The regions a location's position and a segment's track lie in, derived from the region packs' boundaries — two on a border. Rewritten whenever the position or the installed packs change.</td></tr><tr><td><code>region_group</code>, <code>region_group_region</code>, <code>region_group_location</code>, <code>region_group_tour</code></td><td>Your groupings of places (Berner Oberland, Zentralschweiz) and what each holds: cantons, locations, tours — a link names its group by <code>region_group_id</code>.</td></tr><tr><td><code>location_grade_scale</code></td><td>The scale an area's topo grades a family in (<code>rock</code> → <code>uiaa</code>); its sectors and blocks inherit it.</td></tr><tr><td><code>segment_condition</code>, <code>segment_attribute*</code></td><td>Conditions such as snow or avalanche level, and the attributes you defined yourself.</td></tr><tr><td><code>tour_review</code>, <code>ascent_review</code>, <code>location_review</code>, <code>route_review</code>, <code>tour_pair_review</code>, <code>location_pair_review</code>, <code>route_pair_review</code></td><td>Data-care cases you looked at and left as they are: a check (<code>check_key</code>) answered for a tour, a visit, a location, a route, or a pair of them judged &quot;not the same&quot; (the smaller id first). <code>subject</code> is the table's constant — with <code>check_key</code> it names a row of <code>enum_quality_check</code>, so a mark fits its check. A filtered export carries none.</td></tr><tr><td><code>deleted_aggregate</code></td><td>What was deleted: the kind (<code>tour</code>, <code>location</code>, <code>route</code>, …) and id of each deleted record, with the stamp of its deletion. A full backup carries them; a filtered export carries none.</td></tr></tbody>
 </table></div>
-<p>The other tables describe the app's own state on the device (settings,
-backup history, installed map packs, the migration log) or are the
-vocabularies below.</p>
+<p><strong>Change stamps.</strong> Each record that stands on its own (a tour, a location, a
+route, a partner, …) has a <code>rev</code> column: the value <code>sync_clock</code> had at the
+last change anywhere in that record, its parts included. It orders the
+changes of one logbook and says nothing about when they were made.
+<code>sync_clock</code> moves with every change of your data and with nothing else —
+not with what the app derives or records for itself — so it is also the
+logbook's change counter: the app remembers the value a backup archived,
+and &quot;changed since the last backup&quot; means the clock has moved since.</p>
+<p>The remaining tables hold your settings (<code>app_setting</code>) and the app's own
+bookkeeping — what it records for this device, backup history, installed map packs, the
+migration log (<code>migration_journal</code>: what the import from TourBook 1 did,
+step by step — the old app's difficulty text of a tour is its
+<code>pass3.difficultyDisplay</code> line, the tour as <code>target_id</code>), the schema version
+and the <code>sync_clock</code> — or are the vocabularies below. Archives of schema 61
+and earlier also carry <code>data_generation</code>, a second counter the app no longer
+keeps.</p>
 <p><strong>Stored values are stable English keys,</strong> never translated text: a sport is
 <code>hiking</code>, <code>ski_touring</code>, <code>climbing</code>; an ascent style <code>onsight</code>,
 <code>redpoint</code>; a location kind <code>peak</code>, <code>sector</code>. Every vocabulary is a table of
 its own whose rows are the allowed keys: <code>sport</code>, <code>enum_location_kind</code>,
-<code>enum_ascent_style</code>, <code>enum_ascent_role</code>, <code>enum_difficulty_scale</code>,
-<code>enum_route_character</code>, <code>enum_tour_location_role</code>, <code>condition_value</code>. A grade
-is stored as written on its scale (<code>route_grade.scale</code> = <code>french</code>, <code>value</code> =
-<code>6b+</code>), with <code>ord</code> as its position on that scale for sorting.</p>
+<code>enum_ascent_style</code>, <code>enum_ascent_role</code>, <code>enum_grade_family</code>,
+<code>enum_grade_scale</code>, <code>enum_route_character</code>, <code>enum_tour_location_role</code>,
+<code>enum_quality_check</code>, <code>condition_value</code>. A grade scale names its family, a
+quality check what its review marks name (<code>subject</code>: <code>tour</code>, <code>ascent</code>,
+<code>location</code>, <code>route</code>, <code>tourPair</code>, <code>locationPair</code>, <code>routePair</code>).</p>
+<p><strong>A grade is a level of its family,</strong> never a token of a scale: one row per
+family (<code>route_grade.family</code> = <code>rock</code>, <code>level</code> = <code>57</code>), whichever scale it
+was entered in. The families are <code>alpine</code> (SAC L … EX), <code>rock</code> (French,
+UIAA, YDS, Norwegian), <code>boulder</code> (Font, V), <code>ice</code> (WI), <code>mixed</code> (M), <code>hiking</code> (T),
+<code>via_ferrata</code> (K), <code>snowshoe</code> (WT) and <code>mtb</code> (S). For <code>rock</code>, <code>boulder</code> and
+<code>ice</code> the level is a step of OpenBeta sandbag's score axis (MIT); every
+other family's level is its scale's index (<code>hiking</code>: T1 = 0, T2 = 1, …). The
+token ranges of each scale on its family's axis are the app's
+<code>src/data/gradeAxis.generated.ts</code>: a level reads as the token whose range
+holds it, else the nearest. Each token is stored at one level of its range —
+its middle, rounded down, except where the common Swiss/European table pairs
+a UIAA grade with a French one (IV+ = 4b, V- = 4c, V = 5a, V+ = 5b, VI+ = 6a).
+That table is the grade axis <code>gradeAxisVersion</code> names; the database records it
+as <code>db_meta</code> <code>grade_axis</code>.</p>
 <p><strong>Units are in the column name:</strong> <code>_m</code> metres (<code>gain_m</code>, <code>elevation_m</code>,
 <code>length_m</code>), <code>_s</code> whole seconds (<code>duration_s</code>), <code>_km</code> kilometres, <code>_kmh</code>
 km/h, <code>_mh</code> metres per hour, <code>size_bytes</code> bytes. Positions are WGS 84
-degrees (<code>lat</code>, <code>lon</code>). Times are ISO 8601 text. A missing value is <code>NULL</code>,
-never <code>0</code>. Identifiers are UUIDs (version 7) as text.</p>
+degrees (<code>lat</code> −90 … 90, <code>lon</code> −180 … 180), both set or both <code>NULL</code>. Times
+are ISO 8601 text. A missing value is <code>NULL</code>, never <code>0</code>; a distance, height
+gain or loss, duration, length or size is never negative, and no name is
+blank. The database's own CHECK constraints hold these rules. Identifiers
+are UUIDs (version 7) as text.</p>
 <h2>Tracks: the TBG1 format</h2>
 <p>A <code>.tbg</code> file holds one track as columns of fixed-size numbers, all
 little-endian:</p>
@@ -162,10 +204,13 @@ an archive from any earlier version since then and brings its database up to
 date while doing so; it refuses an archive written by a newer app than
 itself, and one written by a test version before 1.0 (<code>schemaVersion</code> below
 49). An export of selected tours is imported only by
-an app at the same <code>schemaVersion</code>. Your copy of an older archive always
+an app at the same <code>schemaVersion</code> and the same <code>gradeAxisVersion</code>. The grade
+axis is frozen: a version of the app that moves a grade's level raises
+<code>gradeAxisVersion</code> and converts the stored levels on upgrade; it refuses an
+archive on a newer axis than its own. Your copy of an older archive always
 stays readable with the tools above, since every version is a plain SQLite
 database.</p>
 </main>
-<footer><a href="../">Home</a> · <a href="../privacy/">Privacy policy</a> · <a href="../archive-format/">Archive format</a></footer>
+<footer><a href="../">Home</a> · <a href="../privacy/">Privacy policy</a> · <a href="../archive-format/">Archive format</a> · <a href="../import-format/">Tour list import</a></footer>
 </body>
 </html>
