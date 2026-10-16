@@ -40,7 +40,7 @@ footer { margin-top: 3rem; padding-bottom: 32px; font-size: 14px; color: var(--m
 <h1>TourBook import format</h1>
 <p>TourBook has no spreadsheet importer. Instead it reads one documented file
 format — an <strong>import file</strong>, a JSON file named <code>*.tourbook.json</code>, holding
-tours, destinations and sector topos — and this page describes it completely,
+tours, destinations, sector topos and challenge lists — and this page describes it completely,
 so that an AI (or a script) can turn any spreadsheet, logbook export, list of
 tours or of summits into such a file <strong>outside</strong> the app. The app then imports
 the file through the same path its tour form saves through, so an imported
@@ -74,10 +74,11 @@ put it into the tour's <code>description</code>.</p>
 <h3>File</h3>
 <div class="table"><table>
 <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
-<tbody><tr><td><code>format</code></td><td><code>&quot;tourbook-import&quot;</code></td><td>yes</td><td>Names the format.</td></tr><tr><td><code>version</code></td><td><code>1</code></td><td>yes</td><td>The version of this page. A file of another version is refused.</td></tr><tr><td><code>tours</code></td><td>array of tours</td><td>one of four</td><td>The tours, in any order.</td></tr><tr><td><code>topos</code></td><td>array of topos</td><td>one of four</td><td>Sector topos: routes without a tour (see Capturing a sector topo).</td></tr><tr><td><code>routes</code></td><td>array of topo routes</td><td>one of four</td><td>Only on a sector's screen: routes into that sector, without naming it.</td></tr><tr><td><code>locations</code></td><td>array of locations</td><td>one of four</td><td>Destinations without a tour: peaks, places, areas, sectors (see Capturing destinations).</td></tr><tr><td><code>$schema</code></td><td>string</td><td>no</td><td>Ignored — room for a link to the schema.</td></tr></tbody>
+<tbody><tr><td><code>format</code></td><td><code>&quot;tourbook-import&quot;</code></td><td>yes</td><td>Names the format.</td></tr><tr><td><code>version</code></td><td><code>1</code></td><td>yes</td><td>The version of this page. A file of another version is refused.</td></tr><tr><td><code>tours</code></td><td>array of tours</td><td>one of five</td><td>The tours, in any order.</td></tr><tr><td><code>topos</code></td><td>array of topos</td><td>one of five</td><td>Sector topos: routes without a tour (see Capturing a sector topo).</td></tr><tr><td><code>routes</code></td><td>array of topo routes</td><td>one of five</td><td>Only on a sector's screen: routes into that sector, without naming it.</td></tr><tr><td><code>locations</code></td><td>array of locations</td><td>one of five</td><td>Destinations without a tour: peaks, places, areas, sectors (see Capturing destinations).</td></tr><tr><td><code>challengeLists</code></td><td>array of challenge lists</td><td>one of five</td><td>Lists of summits, huts or passes to tick off (see Capturing challenge lists).</td></tr><tr><td><code>$schema</code></td><td>string</td><td>no</td><td>Ignored — room for a link to the schema.</td></tr></tbody>
 </table></div>
-<p>A file holds tours, topos, destinations, or several — at least one of the four
-lists. On a sector's or area's screen it holds neither tours nor destinations.</p>
+<p>A file holds tours, topos, destinations, challenge lists, or several — at
+least one of the five lists. On a sector's or area's screen it holds neither
+tours nor destinations nor challenge lists.</p>
 <h3>Tour</h3>
 <p>One outing on one day. A multi-day trip is several tours (one per day) in one
 <code>collection</code>.</p>
@@ -195,6 +196,21 @@ sport, as on a tour's route.</p>
 <div class="table"><table>
 <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
 <tbody><tr><td><code>kind</code></td><td><code>&quot;peak&quot;</code>, <code>&quot;place&quot;</code>, <code>&quot;area&quot;</code> or <code>&quot;sector&quot;</code></td><td>yes</td><td>What it is: a summit, a hut, pass or village, a climbing area, a crag sector.</td></tr><tr><td><code>name</code></td><td>string</td><td>yes</td><td>Its name (<code>&quot;Weissmies&quot;</code>).</td></tr><tr><td><code>area</code></td><td>string</td><td>no</td><td>Sectors only: the area the sector lies in (<code>&quot;Balmfluh&quot;</code>). Left out, the sector stands alone.</td></tr><tr><td><code>discipline</code></td><td><code>&quot;rope&quot;</code> or <code>&quot;boulder&quot;</code></td><td>no</td><td>Sectors only: a rope sector (the default) or a boulder sector.</td></tr><tr><td><code>lat</code></td><td>number</td><td>no</td><td>Latitude in degrees, with <code>lon</code>.</td></tr><tr><td><code>lon</code></td><td>number</td><td>no</td><td>Longitude in degrees, with <code>lat</code>.</td></tr><tr><td><code>elevationM</code></td><td>number from −500 to 9,000</td><td>no</td><td>Height in metres.</td></tr><tr><td><code>region</code></td><td>region</td><td>no</td><td>Country and state it lies in, with their ISO codes, and a group of your own that holds it.</td></tr></tbody>
+</table></div>
+<h3>Challenge list</h3>
+<p>A list of your own to tick off (see Capturing challenge lists).</p>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>key</code></td><td>string of <code>a</code>–<code>z</code>, <code>0</code>–<code>9</code> and <code>-</code></td><td>yes</td><td>The list's identifier (<code>&quot;glarner-gipfel&quot;</code>). A list with the key of one of your lists replaces it; the key of a list that comes with the app is refused.</td></tr><tr><td><code>name</code></td><td>string</td><td>yes</td><td>Its name as the challenges tab shows it (<code>&quot;Glarner Gipfel&quot;</code>).</td></tr><tr><td><code>targetKind</code></td><td><code>&quot;peak&quot;</code>, <code>&quot;hut&quot;</code> or <code>&quot;pass&quot;</code></td><td>yes</td><td>What its entries are: summits, huts or passes.</td></tr><tr><td><code>source</code></td><td>string</td><td>no</td><td>Where the list comes from (a book, a website).</td></tr><tr><td><code>version</code></td><td>string</td><td>no</td><td>The list's own version (<code>&quot;2026&quot;</code>).</td></tr><tr><td><code>targets</code></td><td>array of challenge targets</td><td>yes</td><td>The entries, at least one, in the order the tab lists them.</td></tr></tbody>
+</table></div>
+<h3>Challenge target</h3>
+<p>One entry of a challenge list. A name and region code appear at most once per
+list — unless every entry of that name and code has <code>lat</code> and <code>lon</code> and they
+lie more than 1000 m apart: then they are namesakes, like the three &quot;Schijen&quot;
+of Uri, and each is ticked by a location near it.</p>
+<div class="table"><table>
+<thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Meaning</th></tr></thead>
+<tbody><tr><td><code>name</code></td><td>string</td><td>yes</td><td>The summit's, hut's or pass's name (<code>&quot;Tödi&quot;</code>). A tour reaching a location of this name ticks it — a peak on a list of peaks, a place on a list of huts or passes.</td></tr><tr><td><code>lat</code></td><td>number</td><td>no</td><td>Latitude in degrees, with <code>lon</code> — places the entry on the challenge's map, and tells namesakes apart: where several entries or several of your locations share a name, a placed location ticks only the nearest entry within 1000 m.</td></tr><tr><td><code>lon</code></td><td>number</td><td>no</td><td>Longitude in degrees, with <code>lat</code>.</td></tr><tr><td><code>elevationM</code></td><td>number from −500 to 9,000</td><td>no</td><td>Height in metres.</td></tr><tr><td><code>regionName</code></td><td>string</td><td>no</td><td>Shown beside the entry (<code>&quot;Glarus&quot;</code>).</td></tr><tr><td><code>regionCode</code></td><td>ISO 3166 code</td><td>no</td><td>The country (<code>&quot;CH&quot;</code>) or state (<code>&quot;CH-GL&quot;</code>) the entry stands for, in a list of one per region.</td></tr><tr><td><code>aliases</code></td><td>array of strings</td><td>no</td><td>Other names a tour may give the place (<code>[&quot;Piz Russein&quot;]</code>).</td></tr></tbody>
 </table></div>
 <h2>Grades</h2>
 <p>A grades object maps a <strong>scale</strong> to a <strong>grade token</strong> of that scale:
@@ -476,6 +492,30 @@ find them by name.</p>
     { &quot;kind&quot;: &quot;sector&quot;, &quot;name&quot;: &quot;Blockfeld&quot;, &quot;area&quot;: &quot;Balmfluh&quot;, &quot;discipline&quot;: &quot;boulder&quot;, &quot;region&quot;: { &quot;country&quot;: &quot;Schweiz&quot;, &quot;countryCode&quot;: &quot;CH&quot;, &quot;state&quot;: &quot;Solothurn&quot;, &quot;stateCode&quot;: &quot;CH-SO&quot; } }
   ]
 }</code></pre>
+<h2>Capturing challenge lists</h2>
+<p>A list to tick off — the summits of a canton, the huts of a guidebook, the
+passes of a road trip — becomes a file of <strong>challengeLists</strong>: each with its
+<code>key</code>, <code>name</code>, what its entries are, and the entries. The app shows it on the
+<strong>Statistics › Challenges</strong> tab like the lists it comes with: how many are
+done, which tour reached each, and where they are on the map.</p>
+<ul><li><strong>Settings › Tools › Data import</strong> takes a file of <code>challengeLists</code>, alone or beside the other lists. The challenges tab links there.</li><li><strong>An entry is done when a tour reaches it</strong>: a location of the same name (or one of its <code>aliases</code>) on a tour — a peak on a list of peaks, a place on a list of huts or passes — reached, not turned back from. The tours already recorded tick the list at once.</li><li><strong>Namesakes are told apart by position.</strong> Where a name is shared — by two entries of the list, or by two of your locations — and both the entry and the location have a position, the location ticks the entry only within 1000 m of it, and of several such entries the nearest. A name nobody else carries ticks as before, however far off its location is placed. An entry that stands for several regions at one summit repeats its name and its position with each <code>regionCode</code>, and one visit ticks them all.</li><li><strong>An entry with a position is filed under the installed packs</strong> where a pack holds a summit, hut or pass of its name within 1000 m: a location picked from the map then ticks it whatever name it carries.</li><li><strong>A list is replaced, never doubled</strong>: a list with the key of one of your lists replaces it whole, and the ticks stay — they come from the tours. A key of a list that comes with the app is refused; give yours a key of its own.</li><li>One list is one transaction; a list with any problem is left out whole.</li></ul>
+<pre><code>{
+  &quot;format&quot;: &quot;tourbook-import&quot;,
+  &quot;version&quot;: 1,
+  &quot;challengeLists&quot;: [
+    {
+      &quot;key&quot;: &quot;glarner-gipfel&quot;,
+      &quot;name&quot;: &quot;Glarner Gipfel&quot;,
+      &quot;targetKind&quot;: &quot;peak&quot;,
+      &quot;source&quot;: &quot;My own list&quot;,
+      &quot;targets&quot;: [
+        { &quot;name&quot;: &quot;Tödi&quot;, &quot;lat&quot;: 46.8115, &quot;lon&quot;: 8.9146, &quot;elevationM&quot;: 3614, &quot;regionName&quot;: &quot;Glarus&quot;, &quot;regionCode&quot;: &quot;CH-GL&quot;, &quot;aliases&quot;: [&quot;Piz Russein&quot;] },
+        { &quot;name&quot;: &quot;Glärnisch&quot;, &quot;elevationM&quot;: 2915, &quot;regionName&quot;: &quot;Glarus&quot;, &quot;regionCode&quot;: &quot;CH-GL&quot; },
+        { &quot;name&quot;: &quot;Hausstock&quot;, &quot;elevationM&quot;: 3158 }
+      ]
+    }
+  ]
+}</code></pre>
 <h2>JSON Schema</h2>
 <p>The shape of the file as a <a href="https://json-schema.org">JSON Schema</a> (draft
 2020-12). It checks the structure and the vocabularies; which fields each
@@ -493,6 +533,7 @@ above.</p>
     &quot;topos&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/topo&quot; } },
     &quot;routes&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/topoRoute&quot; } },
     &quot;locations&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/location&quot; } },
+    &quot;challengeLists&quot;: { &quot;type&quot;: [&quot;array&quot;, &quot;null&quot;], &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/challengeList&quot; } },
     &quot;$schema&quot;: { &quot;type&quot;: &quot;string&quot; }
   },
   &quot;required&quot;: [&quot;format&quot;, &quot;version&quot;],
@@ -500,7 +541,8 @@ above.</p>
     { &quot;required&quot;: [&quot;tours&quot;], &quot;properties&quot;: { &quot;tours&quot;: { &quot;type&quot;: &quot;array&quot; } } },
     { &quot;required&quot;: [&quot;topos&quot;], &quot;properties&quot;: { &quot;topos&quot;: { &quot;type&quot;: &quot;array&quot; } } },
     { &quot;required&quot;: [&quot;routes&quot;], &quot;properties&quot;: { &quot;routes&quot;: { &quot;type&quot;: &quot;array&quot; } } },
-    { &quot;required&quot;: [&quot;locations&quot;], &quot;properties&quot;: { &quot;locations&quot;: { &quot;type&quot;: &quot;array&quot; } } }
+    { &quot;required&quot;: [&quot;locations&quot;], &quot;properties&quot;: { &quot;locations&quot;: { &quot;type&quot;: &quot;array&quot; } } },
+    { &quot;required&quot;: [&quot;challengeLists&quot;], &quot;properties&quot;: { &quot;challengeLists&quot;: { &quot;type&quot;: &quot;array&quot; } } }
   ],
   &quot;additionalProperties&quot;: false,
   &quot;$defs&quot;: {
@@ -717,6 +759,35 @@ above.</p>
         &quot;region&quot;: { &quot;$ref&quot;: &quot;#/$defs/region&quot; }
       },
       &quot;required&quot;: [&quot;kind&quot;, &quot;name&quot;],
+      &quot;additionalProperties&quot;: false
+    },
+    &quot;challengeList&quot;: {
+      &quot;description&quot;: &quot;A challenge list of your own: summits, huts or passes to tick off. A list with the key of one of your lists replaces it.&quot;,
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;key&quot;: { &quot;type&quot;: &quot;string&quot;, &quot;pattern&quot;: &quot;^[a-z0-9-]+$&quot; },
+        &quot;name&quot;: { &quot;$ref&quot;: &quot;#/$defs/text&quot; },
+        &quot;targetKind&quot;: { &quot;enum&quot;: [&quot;peak&quot;, &quot;hut&quot;, &quot;pass&quot;] },
+        &quot;source&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; },
+        &quot;version&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; },
+        &quot;targets&quot;: { &quot;type&quot;: &quot;array&quot;, &quot;minItems&quot;: 1, &quot;items&quot;: { &quot;$ref&quot;: &quot;#/$defs/challengeTarget&quot; } }
+      },
+      &quot;required&quot;: [&quot;key&quot;, &quot;name&quot;, &quot;targetKind&quot;, &quot;targets&quot;],
+      &quot;additionalProperties&quot;: false
+    },
+    &quot;challengeTarget&quot;: {
+      &quot;description&quot;: &quot;One entry of a challenge list. A name and region code appear once per list, unless every entry of that name and code has lat and lon and they lie more than 1000 m apart.&quot;,
+      &quot;type&quot;: &quot;object&quot;,
+      &quot;properties&quot;: {
+        &quot;name&quot;: { &quot;$ref&quot;: &quot;#/$defs/text&quot; },
+        &quot;lat&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: -90, &quot;maximum&quot;: 90 },
+        &quot;lon&quot;: { &quot;type&quot;: [&quot;number&quot;, &quot;null&quot;], &quot;minimum&quot;: -180, &quot;maximum&quot;: 180 },
+        &quot;elevationM&quot;: { &quot;$ref&quot;: &quot;#/$defs/elevation&quot; },
+        &quot;regionName&quot;: { &quot;$ref&quot;: &quot;#/$defs/optionalText&quot; },
+        &quot;regionCode&quot;: { &quot;type&quot;: [&quot;string&quot;, &quot;null&quot;], &quot;pattern&quot;: &quot;^[A-Z]{2}(-[A-Z0-9]{1,3})?$&quot; },
+        &quot;aliases&quot;: { &quot;$ref&quot;: &quot;#/$defs/names&quot; }
+      },
+      &quot;required&quot;: [&quot;name&quot;],
       &quot;additionalProperties&quot;: false
     }
   }
