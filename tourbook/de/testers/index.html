@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TourBook — Testerinnen und Tester gesucht</title>
+<link rel="canonical" href="https://bedfoe.github.io/tourbook/de/testers/">
+<link rel="alternate" hreflang="en" href="https://bedfoe.github.io/tourbook/testers/">
+<link rel="icon" href="../../icon.png">
+<style>
+@font-face { font-family: 'Manrope'; src: url('../../fonts/manrope-variable.woff2') format('woff2'); font-weight: 200 800; font-display: swap; }
+:root {
+  --bg: #F6F6F3; --surface: #FFFFFF; --ink: #17282B; --muted: #56676A; --line: #DCE3E2;
+  --accent: #0B6E7F; --accent-deep: #064651; --accent-soft: #C2E0E5; --sun: #FCD34D; --band-fg: #F6F6F3;
+  --contour: rgba(255,255,255,.13);
+  --font: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --bg: #0F1A1C; --surface: #16262A; --ink: #E8EEEC; --muted: #9AACAD; --line: #24383C;
+  --accent: #3FA3B3; --accent-deep: #08414B; --accent-soft: #1C4A52; --band-fg: #EAF4F5; --contour: rgba(255,255,255,.08);
+  color-scheme: dark; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.6 var(--font); }
+a { color: inherit; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { text-wrap: balance; margin: 0; letter-spacing: -.02em; line-height: 1.08; }
+p { margin: 0; }
+.draft { background: var(--sun); color: #1c1917; padding: 8px 16px; font-weight: 600; text-align: center; }
+
+.hero { position: relative; overflow: hidden; background: var(--accent-deep); color: var(--band-fg); }
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.top { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 20px 0; }
+.brand { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.1rem; text-decoration: none; }
+.brand img { width: 40px; height: 40px; border-radius: 10px; }
+.top nav { display: flex; gap: 18px; font-size: .92rem; }
+.top nav a { text-decoration: none; opacity: .85; }
+.top nav a:hover { opacity: 1; text-decoration: underline; }
+.hero-grid { position: relative; display: grid; grid-template-columns: 1.05fr 1fr; gap: 40px; align-items: center; padding-block: 40px 0; }
+.hero-grid.no-fan { grid-template-columns: 1fr; }
+.hero-copy { display: grid; gap: 22px; padding-bottom: 64px; min-width: 0; }
+.badge { justify-self: start; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; background: var(--sun); color: #3A2E05; border-radius: 999px; padding: 5px 12px; }
+.hero h1 { font-size: clamp(2.3rem, 4.6vw, 3.9rem); font-weight: 800; hyphens: auto; }
+.hero h1 em { font-style: normal; color: var(--sun); }
+.lede { font-size: 1.1rem; max-width: 44ch; opacity: .9; }
+.scales { display: flex; flex-wrap: wrap; gap: 8px; font: 500 .8rem var(--mono); }
+.scales span { border: 1px solid rgba(255,255,255,.28); border-radius: 999px; padding: 4px 10px; }
+.cta-btn { justify-self: start; background: var(--sun); color: #2B2204; font-weight: 700; text-decoration: none; padding: 12px 22px; border-radius: 12px; }
+.cta-btn:focus-visible, .copy:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 3px; }
+.fan { position: relative; height: 560px; align-self: end; }
+.fan .phone { position: absolute; bottom: -40px; width: 240px; }
+.fan .phone:nth-child(1) { left: 2%; transform: rotate(-8deg) translateY(30px); z-index: 1; }
+.fan .phone:nth-child(2) { left: 50%; margin-left: -130px; width: 260px; z-index: 3; }
+.fan .phone:nth-child(3) { right: 2%; transform: rotate(8deg) translateY(30px); z-index: 2; }
+@media (prefers-reduced-motion: no-preference) {
+  .fan .phone { animation: rise .9s cubic-bezier(.2,.8,.2,1) both; }
+  .fan .phone:nth-child(2) { animation-delay: .08s; }
+  .fan .phone:nth-child(3) { animation-delay: .16s; }
+  @keyframes rise { from { translate: 0 40px; } to { translate: 0 0; } }
+}
+
+.phone { aspect-ratio: 1080 / 2340; max-width: 100%; border-radius: 34px; padding: 9px; background: #1B2426; box-shadow: 0 30px 60px -20px rgba(0,0,0,.45), inset 0 0 0 1.5px #3A4547; }
+.phone img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 26px; background: #fff; }
+
+.features { display: grid; gap: 96px; padding-block: 96px; }
+.row { display: grid; grid-template-columns: 1fr 300px; gap: 64px; align-items: center; }
+.row:nth-child(even) { grid-template-columns: 300px 1fr; }
+.row:nth-child(even) .text { order: 2; }
+.row:nth-child(odd) .text { justify-self: end; }
+.text { display: grid; gap: 16px; min-width: 0; max-width: 520px; }
+.text h2 { font-size: clamp(1.9rem, 3.6vw, 2.8rem); font-weight: 700; }
+.text p { color: var(--muted); font-size: 1.05rem; max-width: 46ch; }
+.row .phone { width: 300px; justify-self: center; }
+
+.promise { background: var(--accent); color: var(--band-fg); }
+.promise .wrap { padding-block: 72px; display: grid; gap: 36px; }
+.promise h2 { font-size: clamp(2rem, 4.4vw, 3.4rem); font-weight: 800; max-width: 18ch; }
+.pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: rgba(255,255,255,.22); border-radius: 14px; overflow: hidden; }
+.pillars div { background: var(--accent); padding: 22px 20px; display: grid; gap: 6px; align-content: start; }
+.pillars h3 { font-size: 1.15rem; font-weight: 700; }
+.pillars p { font-size: .92rem; opacity: .9; }
+
+.test .wrap { padding-block: 88px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 56px; align-items: start; }
+.test h2 { font-size: clamp(1.9rem, 3.6vw, 2.8rem); font-weight: 700; margin-bottom: 24px; }
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 18px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: baseline; color: var(--muted); }
+.steps li::before { content: counter(s); display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--accent-soft); color: var(--ink); font-weight: 700; }
+.join { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 28px; display: grid; gap: 14px; min-width: 0; }
+.join h3 { font-size: 1.6rem; font-weight: 800; }
+.join p { color: var(--muted); }
+.mail { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.mail code { font: 500 1.02rem var(--mono); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; user-select: all; overflow-wrap: anywhere; min-width: 0; }
+.mail code.missing { color: var(--muted); }
+.copy { background: var(--accent); color: #fff; border: 0; border-radius: 10px; padding: 11px 16px; font: 600 .95rem var(--font); cursor: pointer; }
+.join small { color: var(--muted); font-size: .85rem; line-height: 1.5; }
+
+footer .wrap { padding-block: 28px 44px; border-top: 1px solid var(--line); color: var(--muted); font-size: .88rem; }
+footer a { color: var(--accent); }
+
+@media (max-width: 860px) {
+  .hero-grid { grid-template-columns: 1fr; padding-block: 32px 0; }
+  .hero-copy { padding-bottom: 8px; }
+  .fan { height: 420px; }
+  .fan .phone { width: 170px; }
+  .fan .phone:nth-child(2) { width: 190px; margin-left: -95px; }
+  .features { gap: 72px; padding-block: 64px; }
+  .row, .row:nth-child(even) { grid-template-columns: 1fr; gap: 28px; }
+  .row:nth-child(even) .text { order: 0; }
+  .row:nth-child(odd) .text { justify-self: start; }
+  .row .phone { width: min(280px, 78vw); }
+  .pillars { grid-template-columns: repeat(2, 1fr); }
+  .test .wrap { grid-template-columns: 1fr; gap: 36px; padding-block: 64px; }
+}
+@media (max-width: 420px) {
+  .fan { height: 360px; }
+  .fan .phone { width: 140px; }
+  .fan .phone:nth-child(2) { width: 160px; margin-left: -80px; }
+  .pillars { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header class="hero">
+<canvas id="contours" aria-hidden="true"></canvas>
+<div class="wrap top"><a class="brand" href="../../de/"><img src="../../icon.png" alt="">TourBook</a><nav><a href="../../de/privacy/">Datenschutz</a><a href="../../testers/" hreflang="en">English</a></nav></div>
+<div class="wrap hero-grid">
+<div class="hero-copy">
+<span class="badge">Dein Outdoor-Tourenbuch</span>
+<h1>Testerinnen und Tester gesucht</h1>
+<p class="lede">TourBook ist ein privates Tourenbuch für alles, was du draussen unternimmst: von der T2-Wanderung bis zur 7a-Mehrseillänge, von der Skitour bis zum Gleitschirmflug. Bevor die App in den Play Store kommt, suche ich Leute, die sie zwei Wochen lang im Alltag ausprobieren.</p>
+<div class="scales"><span>T1–T6</span><span>WS</span><span>7a</span><span>WI5</span><span>K4</span><span>Font 6B</span></div>
+<a class="cta-btn" href="#join">Mitmachen?</a>
+</div>
+<div class="fan" aria-hidden="true"><div class="phone"><img src="../../screens/de/03_statistics.png" width="1080" height="2340" alt=""></div><div class="phone"><img src="../../screens/de/01_tour-list.png" width="1080" height="2340" alt=""></div><div class="phone"><img src="../../screens/de/05_map.png" width="1080" height="2340" alt=""></div></div>
+</div>
+</header>
+<main class="wrap features"><section class="row"><div class="text"><h2>Dein Outdoor-Tourenbuch</h2><p>Jede Tour mit Track-Miniatur, Distanz, Höhenmetern, Dauer und Schwierigkeit, nach Monaten geordnet. Die Suche findet Ort, Gebiet, Partner und Route.</p></div><div class="phone"><img src="../../screens/de/01_tour-list.png" width="1080" height="2340" alt="Dein Outdoor-Tourenbuch" loading="lazy"></div></section>
+<section class="row"><div class="text"><h2>Jede Tour mit allen Details</h2><p>Karte, Kennzahlen, Höhenprofil, Verhältnisse und jede Seillänge mit ihrem Grad. Alles, was du in zehn Jahren noch nachlesen willst.</p></div><div class="phone"><img src="../../screens/de/02_tour-detail.png" width="1080" height="2340" alt="Jede Tour mit allen Details" loading="lazy"></div></section>
+<section class="row"><div class="text"><h2>Alle Tracks auf einer Karte</h2><p>Alle Tracks auf swisstopo- oder OpenStreetMap-Karten, mit Heatmap und Gipfel-Pins. Ein Filter gilt für Liste, Karte und Statistik zugleich.</p></div><div class="phone"><img src="../../screens/de/05_map.png" width="1080" height="2340" alt="Alle Tracks auf einer Karte" loading="lazy"></div></section>
+<section class="row"><div class="text"><h2>Statistik bis ins Detail</h2><p>Totale pro Sportart, Jahr und Saison, Rekorde, Verteilungen und der Jahresvergleich am gleichen Tag.</p></div><div class="phone"><img src="../../screens/de/03_statistics.png" width="1080" height="2340" alt="Statistik bis ins Detail" loading="lazy"></div></section>
+<section class="row"><div class="text"><h2>18 Sportarten, jede mit eigenen Feldern</h2><p>Eine GPX-Datei füllt Distanz, Höhenmeter, Gipfel und Orte aus. Eine Tour kann mehrere Abschnitte haben, zum Beispiel Hike &amp; Fly.</p></div><div class="phone"><img src="../../screens/de/04_tour-form.png" width="1080" height="2340" alt="18 Sportarten, jede mit eigenen Feldern" loading="lazy"></div></section>
+<section class="row"><div class="text"><h2>Gebiete, Sektoren, Routen</h2><p>Eine Route legst du einmal an und findest sie bei jeder Begehung wieder, mit Anläufen, Stil und Seillängen.</p></div><div class="phone"><img src="../../screens/de/06_sector.png" width="1080" height="2340" alt="Gebiete, Sektoren, Routen" loading="lazy"></div></section>
+<section class="row"><div class="text"><h2>Welche Viertausender fehlen noch?</h2><p>Schweizer und Alpen-Viertausender, Kantonshöhepunkte, SAC-Hütten und Passstrassen. Deine Gipfel zählen automatisch mit.</p></div><div class="phone"><img src="../../screens/de/07_challenges.png" width="1080" height="2340" alt="Welche Viertausender fehlen noch?" loading="lazy"></div></section></main>
+<section class="promise"><div class="wrap">
+<h2>Ohne Konto. Ohne Werbung. Deine Daten.</h2>
+<div class="pillars"><div><h3>Privat und deins</h3><p>Kein Konto, keine Werbung, kein Tracking. Deine Touren liegen auf deinem Handy und lassen sich auch ohne Netz erfassen; nur die Karte braucht eine Verbindung.</p></div><div><h3>18 Sportarten</h3><p>Jede mit ihren Feldern und Skalen: SAC, UIAA, französisch, Font, K1–K6, Lawinenstufe, Flugart.</p></div><div><h3>Schnell erfasst</h3><p>GPX laden: Distanz, Höhenmeter, Gipfel und Region werden vorgeschlagen. Eine Route legst du einmal an.</p></div><div><h3>Statistik satt</h3><p>Jahresvergleich, Rekorde, Grad-Pyramide, Viertausender-Liste, Höhenprofile.</p></div></div>
+</div></section>
+<section class="test" id="join"><div class="wrap">
+<div><h2>So läuft der Test</h2><ol class="steps"><li><span>Du brauchst ein Android-Handy (ab Android 7) und ein Google-Konto.</span></li><li><span>Du bekommst eine Einladung zum geschlossenen Test im Google Play Store.</span></li><li><span>Ab Version 0.1.0 bleiben deine Daten bei jedem Update erhalten. Hast du eine ältere Entwicklerversion, deinstalliere sie zuerst.</span></li><li><span>Lass die App mindestens 14 Tage installiert und erfasse deine Touren. Google verlangt diese Zeit für die Freigabe.</span></li><li><span>Sag mir, was dir auffällt: Fehler, Wünsche, Unklares.</span></li></ol></div>
+<div class="join"><h3>Mitmachen?</h3><p>Schick mir die E-Mail-Adresse deines Google-Kontos:</p><div class="mail"><code id="mail">foehnetics@gmail.com</code><button class="copy" id="copy" type="button" data-copied="Kopiert" data-selected="Markiert">Kopieren</button></div><small>Für den Test brauche ich nur die E-Mail-Adresse deines Google-Kontos, um dich in Google Play freizuschalten. Deine Touren bleiben auf deinem Gerät.</small></div>
+</div></section>
+<footer><div class="wrap"><a href="../../de/">Startseite</a> · <a href="../../de/privacy/">Datenschutz</a> · <a href="../../archive-format/">Archivformat</a> · <a href="../../import-format/">Importformat</a></div></footer>
+<script>
+(function () {
+  var canvas = document.getElementById('contours');
+  if (canvas) {
+    var ctx = canvas.getContext('2d');
+    var peaks = [[.78, .25, .42], [.55, .7, .3], [.15, .4, .35], [.95, .85, .25]];
+    var height = function (x, y) {
+      return peaks.reduce(function (v, p) { return v + Math.exp(-((x - p[0]) * (x - p[0]) + (y - p[1]) * (y - p[1])) / (p[2] * p[2])); }, 0);
+    };
+    var draw = function () {
+      var r = canvas.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+      canvas.width = r.width * dpr; canvas.height = r.height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--contour');
+      var step = 8, cols = Math.ceil(r.width / step) + 1, rows = Math.ceil(r.height / step) + 1, grid = [];
+      for (var j = 0; j < rows; j++) for (var i = 0; i < cols; i++) grid.push(height(i * step / r.width, j * step / r.height));
+      ctx.beginPath();
+      for (var level = 0.12; level < 1.4; level += 0.09) {
+        for (j = 0; j < rows - 1; j++) for (i = 0; i < cols - 1; i++) {
+          var a = grid[j * cols + i], b = grid[j * cols + i + 1], c = grid[(j + 1) * cols + i + 1], d = grid[(j + 1) * cols + i];
+          var x = i * step, y = j * step, pts = [];
+          var edge = function (v1, v2, x1, y1, x2, y2) {
+            if ((v1 < level) !== (v2 < level)) { var t = (level - v1) / (v2 - v1); pts.push([x1 + (x2 - x1) * t, y1 + (y2 - y1) * t]); }
+          };
+          edge(a, b, x, y, x + step, y); edge(b, c, x + step, y, x + step, y + step);
+          edge(c, d, x + step, y + step, x, y + step); edge(d, a, x, y + step, x, y);
+          for (var k = 0; k + 1 < pts.length; k += 2) { ctx.moveTo(pts[k][0], pts[k][1]); ctx.lineTo(pts[k + 1][0], pts[k + 1][1]); }
+        }
+      }
+      ctx.stroke();
+    };
+    draw();
+    var timer;
+    window.addEventListener('resize', function () { clearTimeout(timer); timer = setTimeout(draw, 150); });
+  }
+  var copy = document.getElementById('copy');
+  if (copy) copy.addEventListener('click', function () {
+    var mail = document.getElementById('mail'), label = copy.textContent;
+    var done = function (text) { copy.textContent = text; setTimeout(function () { copy.textContent = label; }, 1800); };
+    var select = function () { var range = document.createRange(); range.selectNodeContents(mail); var s = getSelection(); s.removeAllRanges(); s.addRange(range); done(copy.dataset.selected); };
+    try { navigator.clipboard.writeText(mail.textContent).then(function () { done(copy.dataset.copied); }, select); } catch (e) { select(); }
+  });
+})();
+</script>
+</body>
+</html>
